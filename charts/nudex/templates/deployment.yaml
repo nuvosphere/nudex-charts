@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - {{ .Values.nodeSelector.app }}
+        podAntiAffinity: {{ toYaml .Values.affinity.podAntiAffinity | nindent 8 }}
+      serviceAccountName: filebeat-sa
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs/{{ .Chart.Name }}
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "{{ .Values.env.SPRING_PROFILES_ACTIVE }}"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 30
+        - name: filebeat
+          image: "{{ .Values.filebeat.image.repository }}:{{ .Values.filebeat.image.tag }}"
+          imagePullPolicy: {{ .Values.filebeat.image.pullPolicy }}
+          env:
+            - name: APP_NAME
+              value: "{{ .Chart.Name }}"
+            - name: ELASTICSEARCH_HOSTS
+              value: "{{ .Values.env.ELASTICSEARCH_HOSTS }}"
+            - name: LOGSTASH_HOSTS
+              value: "{{ .Values.env.LOGSTASH_HOSTS }}"
+            - name: KIBANA_HOST
+              value: "{{ .Values.env.KIBANA_HOST }}"
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs/{{ .Chart.Name }}
+            - name: config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+          resources:
+            limits:
+              cpu: {{ .Values.filebeatResources.limits.cpu }}
+              memory: {{ .Values.filebeatResources.limits.memory }}
+      volumes:
+        - emptyDir: {}
+          name: logs
+        - name: config
+          configMap:
+            name: filebeat-config
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 6 }}

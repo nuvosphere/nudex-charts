@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nudex
+description: A Helm chart for deploying nudex
+type: application
+version: 0.1.1
+appVersion: "1.0.0"
