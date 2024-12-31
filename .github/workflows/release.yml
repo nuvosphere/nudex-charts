@@ -28,7 +28,7 @@ jobs:
 
       - name: Add Helm repo
         run: |
-          helm repo add goat https://nuvosphere.github.io/nudex-charts
+          helm repo add nudex https://nuvosphere.github.io/nudex-charts
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
