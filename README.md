@@ -12,7 +12,7 @@ Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
 Once Helm is set up properly, add the repo as follows:
 
 ```console
-helm repo add goat https://nuvosphere.github.io/nudex-charts
+helm repo add nudex https://nuvosphere.github.io/nudex-charts
 ```
 
-You can then run `helm search repo goat` to see the charts.
+You can then run `helm search repo nudex` to see the charts.
