@@ -34,7 +34,7 @@ spec:
             name: {{ .Values.envFromSecrets }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.service.targetPort }}
+            - containerPort: {{ .Values.ports.targetPort }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs/{{ .Values.app.name }}
@@ -50,14 +50,14 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.appLivenessProbe.path }}
-              port: {{ .Values.service.targetPort }}
+              port: {{ .Values.ports.targetPort }}
             initialDelaySeconds: {{ .Values.appLivenessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.appLivenessProbe.timeoutSeconds }}
             periodSeconds: {{ .Values.appLivenessProbe.periodSeconds }}
           readinessProbe:
             httpGet:
               path: {{ .Values.appReadinessProbe.path }}
-              port: {{ .Values.service.targetPort }}
+              port: {{ .Values.ports.targetPort }}
             initialDelaySeconds: {{ .Values.appReadinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.appReadinessProbe.timeoutSeconds }}
             periodSeconds: {{ .Values.appReadinessProbe.periodSeconds }}
