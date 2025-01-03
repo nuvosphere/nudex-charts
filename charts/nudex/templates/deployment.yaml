@@ -28,15 +28,8 @@ spec:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.envFromSecrets.enabled }}
-          envFrom:
-          - secretRef:
-            name: {{ .Values.appName }}
-          {{- end }}
           ports:
-            {{- range .Values.service.ports }}
-            - containerPort: {{ .targetPort }}
-            {{- end }}
+            - containerPort: {{ .Values.service.targetPort }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs/{{ .Values.appName }}
@@ -44,29 +37,20 @@ spec:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
               memory: {{ .Values.appResources.limits.memory }}
-          env:
-            {{- range $key, $value := .Values.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
           livenessProbe:
             httpGet:
-              path: {{ .Values.appLivenessProbe.path }}
-              {{- range .Values.service.ports }}
-              port: {{ .targetPort }}
-              {{- end }}
-            initialDelaySeconds: {{ .Values.appLivenessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.appLivenessProbe.timeoutSeconds }}
-            periodSeconds: {{ .Values.appLivenessProbe.periodSeconds }}
+              path: /health
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.timeoutSeconds }}
+            periodSeconds: {{ .Values.periodSeconds }}
           readinessProbe:
             httpGet:
-              path: {{ .Values.appReadinessProbe.path }}
-              {{- range .Values.service.ports }}
-              port: {{ .targetPort }}
-               {{- end }}
-            initialDelaySeconds: {{ .Values.appReadinessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.appReadinessProbe.timeoutSeconds }}
-            periodSeconds: {{ .Values.appReadinessProbe.periodSeconds }}
+              path: /health
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.timeoutSeconds }}
+            periodSeconds: {{ .Values.periodSeconds }}
         - name: filebeat
           image: "{{ .Values.filebeat.image.repository }}:{{ .Values.filebeat.image.tag }}"
           imagePullPolicy: {{ .Values.filebeat.image.pullPolicy }}

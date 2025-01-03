@@ -20,17 +20,10 @@ appResources:
     cpu: "1"
     memory: "2Gi"
 
-LivenessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  timeoutSeconds: 10
-  periodSeconds: 30
-
-ReadinessProbe:
-  path: /health
-  initialDelaySeconds: 30
-  timeoutSeconds: 10
-  periodSeconds: 30
+path: /health
+initialDelaySeconds: 30
+timeoutSeconds: 10
+periodSeconds: 30
 
 filebeatResources:
   limits:
@@ -39,13 +32,10 @@ filebeatResources:
 
 service:
   type: ClusterIP
-  nodePort: nil
-  loadBalancerIP: nil
-  ports:
-    - name: http
-      port: 80
-      targetPort: 8080
-      protocol: TCP
+  nodePort: 33567
+  port: 80
+  targetPort: 8080
+  protocol: TCP
     # - name: https
     #   port: 443
     #   targetPort: 8443

@@ -10,5 +10,5 @@ metadata:
       app: {{ .Values.appName }}
   endpoints:
     - port: {{ .Values.service.targetPort }}
-    path: /metrics
+      path: /metrics
 {{- end}}

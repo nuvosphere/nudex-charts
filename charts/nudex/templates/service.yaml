@@ -9,15 +9,13 @@ spec:
   selector:
     app: {{ .Values.appName }}
   ports:
-    {{- range .Values.service.ports }}
-    - port: {{ .port }}
-      targetPort: {{ .targetPort }}
-      protocol: {{ .protocol }}
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: {{ .Values.service.protocol }}
       name: {{ .Values.appName }}
-    {{- end }}
-  {{- if eq .Values.service.type "NodePort" }}
-  nodePort: {{ .Values.service.nodePort }}
-  {{- end }}
-  {{- if eq .Values.service.type "LoadBalancer" }}
-  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
-  {{- end }}
+      # {{- if eq .Values.service.type "NodePort" }}
+      # nodePort: {{ .Values.service.nodePort }}
+      # {{- end }}
+      # {{- if eq .Values.service.type "LoadBalancer" }}
+      # loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+      # {{- end }}
