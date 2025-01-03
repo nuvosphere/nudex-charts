@@ -63,17 +63,6 @@ filebeat_env:
 nodeSelector:
   app: nudex-testnet
 
-affinity:
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-            - key: app
-              operator: In
-              values:
-                - nux-gateway-http
-        topologyKey: kubernetes.io/hostname
-
 imagePullSecrets:
   - name: ecr-secret
 

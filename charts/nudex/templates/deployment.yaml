@@ -23,7 +23,15 @@ spec:
                     operator: In
                     values:
                       - {{ .Values.nodeSelector.app }}
-        podAntiAffinity: {{ toYaml .Values.affinity.podAntiAffinity | nindent 8 }}
+        podAntiAffinity: 
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - {{ .Values.appName }}
+              topologyKey: kubernetes.io/hostname
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
