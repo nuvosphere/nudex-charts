@@ -1,0 +1,14 @@
+{{- if .Values.serviceMonitor.enabled}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.app.name }}
+  labels:
+    app: {{ .Values.app.name }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  endpoints:
+    - port: {{ .Values.service.targetPort }}
+      path: /metrics
+{{- end}}

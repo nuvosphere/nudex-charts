@@ -1,14 +1,30 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-http-service
+  name: {{ .Values.app.name }}
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ .Values.app.name }}
 spec:
+  type: {{ .Values.serviceType }}
   selector:
-    app: {{ .Chart.Name }}
+    app: {{ .Values.app.name }}
   ports:
-    - protocol: TCP
-      port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-  type: {{ .Values.service.type }}
+    {{- range .Values.ports }}
+    - port: {{ .port }}
+      targetPort:
+       {{- if .targetPort }}
+       name: {{ .targetPort }}
+       {{- else }}
+       {{ .port }}
+       {{- end }}
+      protocol: {{ .protocol }}
+    {{- end }}
+  {{- if eq .Values.serviceType "NodePort" }}
+  nodePort: {{ .Values.nodePort }}
+  {{- end }}
+  {{- if eq .Values.serviceType "LoadBalancer" }}
+  loadBalancerIP: {{ .Values.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.externalTrafficPolicy }}
+  {{- end }}

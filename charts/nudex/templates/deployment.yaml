@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Values.app.name }}
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ .Values.app.name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      app: {{ .Values.app.name }}
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        app: {{ .Values.app.name }}
     spec:
       affinity:
         nodeAffinity:
@@ -24,53 +24,59 @@ spec:
                     values:
                       - {{ .Values.nodeSelector.app }}
         podAntiAffinity: {{ toYaml .Values.affinity.podAntiAffinity | nindent 8 }}
-      serviceAccountName: filebeat-sa
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.app.name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.envFromSecrets }}
+          envFrom:
+          - secretRef:
+            name: {{ .Values.envFromSecrets }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/{{ .Chart.Name }}
+              mountPath: /app/logs/{{ .Values.app.name }}
           resources:
             limits:
-              cpu: {{ .Values.resources.limits.cpu }}
-              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.appResources.limits.cpu }}
+              memory: {{ .Values.appResources.limits.memory }}
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "{{ .Values.env.SPRING_PROFILES_ACTIVE }}"
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.appLivenessProbe.path }}
               port: {{ .Values.service.targetPort }}
-            initialDelaySeconds: 30
-            timeoutSeconds: 10
-            periodSeconds: 30
+            initialDelaySeconds: {{ .Values.appLivenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.appLivenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.appLivenessProbe.periodSeconds }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.appReadinessProbe.path }}
               port: {{ .Values.service.targetPort }}
-            initialDelaySeconds: 30
-            timeoutSeconds: 10
-            periodSeconds: 30
+            initialDelaySeconds: {{ .Values.appReadinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.appReadinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.appReadinessProbe.periodSeconds }}
         - name: filebeat
           image: "{{ .Values.filebeat.image.repository }}:{{ .Values.filebeat.image.tag }}"
           imagePullPolicy: {{ .Values.filebeat.image.pullPolicy }}
           env:
             - name: APP_NAME
-              value: "{{ .Chart.Name }}"
+              value: "{{ .Values.app.name }}"
             - name: ELASTICSEARCH_HOSTS
-              value: "{{ .Values.env.ELASTICSEARCH_HOSTS }}"
+              value: "{{ .Values.filebeat_env.ELASTICSEARCH_HOSTS }}"
             - name: LOGSTASH_HOSTS
-              value: "{{ .Values.env.LOGSTASH_HOSTS }}"
+              value: "{{ .Values.filebeat_env.LOGSTASH_HOSTS }}"
             - name: KIBANA_HOST
-              value: "{{ .Values.env.KIBANA_HOST }}"
+              value: "{{ .Values.filebeat_env.KIBANA_HOST }}"
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/{{ .Chart.Name }}
-            - name: config
+              mountPath: /app/logs/{{ .Values.app.name }}
+            - name: {{ .Values.filebeat.configName | default "filebeat-config" }}
               mountPath: /usr/share/filebeat/filebeat.yml
               subPath: filebeat.yml
           resources:

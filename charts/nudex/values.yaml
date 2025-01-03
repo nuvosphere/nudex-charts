@@ -1,5 +1,8 @@
 replicaCount: 2
 
+app:
+  name：test
+
 image:
   repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
   tag: nux-gateway-http-latest
@@ -10,23 +13,62 @@ filebeat:
     repository: docker.elastic.co/beats/filebeat
     tag: 7.10.1
     pullPolicy: Always
+  configName: "filebeat-config"
+  logstashHost: "output-logstash.default:5045"
 
-resources:
+appResources:
   limits:
     cpu: "1"
     memory: "2Gi"
+
+LivenessProbe:
+  path: /health
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
+
+ReadinessProbe:
+  path: /health
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
 
 filebeatResources:
   limits:
     cpu: "500m"
     memory: "200Mi"
 
-service:
-  type: ClusterIP
-  port: 80
+serviceType: ClusterIP # 可以是 "ClusterIP"、"NodePort" 或 "LoadBalancer"
+nodePort: null # 当 serviceType 为 "NodePort" 时使用
+loadBalancerIP: null # 当 serviceType 为 "LoadBalancer" 时使用
+externalTrafficPolicy: null # 可以是 "Cluster" 或 "Local"，根据需要设置
+ports: 
+- port: 80
   targetPort: 8080
+  protocol: "TCP"
+# - port: 443
+#   targetPort: 8443
+#   protocol: "TCP"
 
 env:
+  ENV_VAR_NAME: value
+  SPRING_PROFILES_ACTIVE: test
+  # JAVA_HEAP_OPTS: -Xmx2048M -Xms1024M -XX:MaxDirectMemorySize=128M
+  # JAVA_OPTS: -Dspring.profiles.active=default
+
+envFromSecrets:
+  enabled: false
+  # - BROKER_AWS_ACCESSKEY
+  # - BROKER_AWS_SECRETKEY
+  # - BROKER_PUBLICAWS_ACCESSKEY
+  # - BROKER_PUBLICAWS_SECRETKEY
+  # - BROKER_ACCESSOSFILEKEY
+  # - BROKER_GEETEST_CONFIGS_0_ID
+  # - BROKER_GEETEST_CONFIGS_0_PRIVATEKEY
+  # - BROKER_GEETEST_CONFIGS_1_ID
+  # - BROKER_GEETEST_CONFIGS_1_PRIVATEKEY
+
+filebeat_env:
   SPRING_PROFILES_ACTIVE: test
   ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
   LOGSTASH_HOSTS: "logstash:5044"
@@ -48,3 +90,6 @@ affinity:
 
 imagePullSecrets:
   - name: ecr-secret
+
+serviceMonitor:
+  enabled: false
