@@ -1,7 +1,6 @@
-replicaCount: 2
+appName: nux-gateway-http
 
-app:
-  name: test
+replicaCount: 2
 
 image:
   repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
@@ -38,17 +37,23 @@ filebeatResources:
     cpu: "500m"
     memory: "200Mi"
 
-serviceType: ClusterIP # 可以是 "ClusterIP"、"NodePort" 或 "LoadBalancer"
-nodePort: null # 当 serviceType 为 "NodePort" 时使用
-loadBalancerIP: null # 当 serviceType 为 "LoadBalancer" 时使用
-externalTrafficPolicy: null # 可以是 "Cluster" 或 "Local"，根据需要设置
-ports: 
-- port: 80
-  targetPort: 8080
-  protocol: "TCP"
-# - port: 443
-#   targetPort: 8443
-#   protocol: "TCP"
+service:
+  type: ClusterIP
+  nodePort: nil
+  loadBalancerIP: nil
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+    # - name: https
+    #   port: 443
+    #   targetPort: 8443
+    #   protocol: TCP
+    # - name: grpc
+    #   port: 50051
+    #   targetPort: 50051
+    #   protocol: TCP
 
 env:
   ENV_VAR_NAME: value
@@ -58,15 +63,6 @@ env:
 
 envFromSecrets:
   enabled: false
-  # - BROKER_AWS_ACCESSKEY
-  # - BROKER_AWS_SECRETKEY
-  # - BROKER_PUBLICAWS_ACCESSKEY
-  # - BROKER_PUBLICAWS_SECRETKEY
-  # - BROKER_ACCESSOSFILEKEY
-  # - BROKER_GEETEST_CONFIGS_0_ID
-  # - BROKER_GEETEST_CONFIGS_0_PRIVATEKEY
-  # - BROKER_GEETEST_CONFIGS_1_ID
-  # - BROKER_GEETEST_CONFIGS_1_PRIVATEKEY
 
 filebeat_env:
   SPRING_PROFILES_ACTIVE: test

@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.app.name }}
+  name: {{ .Values.appName }}
   labels:
-    app: {{ .Values.app.name }}
+    app: {{ .Values.appName }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.app.name }}
+      app: {{ .Values.appName }}
   template:
     metadata:
       labels:
-        app: {{ .Values.app.name }}
+        app: {{ .Values.appName }}
     spec:
       affinity:
         nodeAffinity:
@@ -22,22 +22,24 @@ spec:
                   - key: app
                     operator: In
                     values:
-                      - {{ .Values.nodeSelector.app }}
+                      - {{ .Values.appName }}
         podAntiAffinity: {{ toYaml .Values.affinity.podAntiAffinity | nindent 8 }}
       containers:
-        - name: {{ .Values.app.name }}
+        - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.envFromSecrets }}
+          {{- if .Values.envFromSecrets.enabled }}
           envFrom:
           - secretRef:
-            name: {{ .Values.envFromSecrets }}
+            name: {{ .Values.appName }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.ports.targetPort }}
+            {{- range .Values.service.ports }}
+            - containerPort: {{ .targetPort }}
+            {{- end }}
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/{{ .Values.app.name }}
+              mountPath: /app/logs/{{ .Values.appName }}
           resources:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
@@ -50,14 +52,18 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.appLivenessProbe.path }}
-              port: {{ .Values.ports.targetPort }}
+              {{- range .Values.service.ports }}
+              port: {{ .targetPort }}
+              {{- end }}
             initialDelaySeconds: {{ .Values.appLivenessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.appLivenessProbe.timeoutSeconds }}
             periodSeconds: {{ .Values.appLivenessProbe.periodSeconds }}
           readinessProbe:
             httpGet:
               path: {{ .Values.appReadinessProbe.path }}
-              port: {{ .Values.ports.targetPort }}
+              {{- range .Values.service.ports }}
+              port: {{ .targetPort }}
+               {{- end }}
             initialDelaySeconds: {{ .Values.appReadinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.appReadinessProbe.timeoutSeconds }}
             periodSeconds: {{ .Values.appReadinessProbe.periodSeconds }}
@@ -66,7 +72,7 @@ spec:
           imagePullPolicy: {{ .Values.filebeat.image.pullPolicy }}
           env:
             - name: APP_NAME
-              value: "{{ .Values.app.name }}"
+              value: "{{ .Values.appName }}"
             - name: ELASTICSEARCH_HOSTS
               value: "{{ .Values.filebeat_env.ELASTICSEARCH_HOSTS }}"
             - name: LOGSTASH_HOSTS
@@ -75,7 +81,7 @@ spec:
               value: "{{ .Values.filebeat_env.KIBANA_HOST }}"
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/{{ .Values.app.name }}
+              mountPath: /app/logs/{{ .Values.appName }}
             - name: {{ .Values.filebeat.configName | default "filebeat-config" }}
               mountPath: /usr/share/filebeat/filebeat.yml
               subPath: filebeat.yml
