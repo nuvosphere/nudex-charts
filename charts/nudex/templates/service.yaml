@@ -11,14 +11,7 @@ spec:
   ports:
     {{- range .Values.ports }}
     - port: {{ .port }}
-      targetPort:
-       {{- if .targetPort }}
-       name: {{ .targetPort }}
-       {{- else }}
-       {{ .port }}
-       {{- end }}
-      protocol: {{ .protocol }}
-    {{- end }}
+      targetPort: {{ .targetPort }}
   {{- if eq .Values.serviceType "NodePort" }}
   nodePort: {{ .Values.nodePort }}
   {{- end }}
