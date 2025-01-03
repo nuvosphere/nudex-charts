@@ -78,5 +78,5 @@ spec:
           name: logs
         - name: config
           configMap:
-            name: filebeat-config
+            name: {{ .Values.filebeat.configName | default "filebeat-config" }}
       imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 6 }}

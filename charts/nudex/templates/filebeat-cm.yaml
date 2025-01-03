@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .values.filebeat.configName | default "filebeat-config" }}
+  name: {{ .Values.filebeat.configName | default "filebeat-config" }}
 data:
   filebeat.yml: |-
     filebeat.inputs:
