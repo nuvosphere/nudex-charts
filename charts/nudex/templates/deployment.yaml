@@ -22,7 +22,7 @@ spec:
                   - key: app
                     operator: In
                     values:
-                      - {{ .Values.appName }}
+                      - {{ .Values.nodeSelector.app }}
         podAntiAffinity: {{ toYaml .Values.affinity.podAntiAffinity | nindent 8 }}
       containers:
         - name: {{ .Values.appName }}
