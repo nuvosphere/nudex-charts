@@ -1,7 +1,7 @@
 replicaCount: 2
 
 app:
-  name：test
+  name: test
 
 image:
   repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
