@@ -1,16 +1,17 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.filebeat.configName | default "filebeat-config" }}
+  name: {{ .Values.filebeat.configName }}
+namespace: {{.Values.namespace }}
 data:
   filebeat.yml: |-
     filebeat.inputs:
     - type: log
       processors:
       paths:
-        - "/app/logs/${APP_NAME}/*.log"
+        - "/app/logs/{{ .Values.appName }}/*.log"
       fields: 
-        app_name: ${APP_NAME}
+        app_name: {{ .Values.appName }}
         namespaces: default
       close_inactive: 1m
       close_timeout: 3h
@@ -23,4 +24,4 @@ data:
       multiline.max_lines: 100
       exclude_files: ['debug']
     output.logstash: 
-      hosts: ["{{ .Values.filebeat.logstashHost }}"]
+      hosts: ["output-logstash.default:5045"]

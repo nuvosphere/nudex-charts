@@ -4,18 +4,20 @@ metadata:
   name: {{ .Values.appName }}
   labels:
     app: {{ .Values.appName }}
+  namespace: {{.Values.namespace }}
 spec:
   type: {{ .Values.service.type }}
   selector:
     app: {{ .Values.appName }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: {{ .Values.service.protocol }}
-      name: {{ .Values.appName }}
-      # {{- if eq .Values.service.type "NodePort" }}
-      # nodePort: {{ .Values.service.nodePort }}
-      # {{- end }}
-      # {{- if eq .Values.service.type "LoadBalancer" }}
-      # loadBalancerIP: {{ .Values.service.loadBalancerIP }}
-      # {{- end }}
+    {{- range .Values.service.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      {{- end }}     
+      {{- if eq .Values.service.type "NodePort" }}
+      {{- if .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+      {{- end }}

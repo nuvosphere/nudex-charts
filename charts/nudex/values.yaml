@@ -1,12 +1,43 @@
+# Deployment Name
 appName: nux-gateway-http
+namespace: alex-test
 
+# Deployment Replicas
 replicaCount: 2
 
+# Deployment image
 image:
   repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
   tag: nux-gateway-http-latest
   pullPolicy: Always
 
+# Deployment Resources
+appResources:
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+# Deployment Health Check
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
+# path: /health
+# initialDelaySeconds: 30
+# timeoutSeconds: 10
+# periodSeconds: 30
+
+# filebeat config default
 filebeat:
   image:
     repository: docker.elastic.co/beats/filebeat
@@ -15,27 +46,21 @@ filebeat:
   configName: "filebeat-config"
   logstashHost: "output-logstash.default:5045"
 
-appResources:
-  limits:
-    cpu: "1"
-    memory: "2Gi"
-
-path: /health
-initialDelaySeconds: 30
-timeoutSeconds: 10
-periodSeconds: 30
-
 filebeatResources:
   limits:
     cpu: "500m"
     memory: "200Mi"
 
+# Deployment Service
 service:
-  type: ClusterIP
-  nodePort: 33567
-  port: 80
-  targetPort: 8080
-  protocol: TCP
+  ports:
+  - name: nux-gateway-http
+    type: ClusterIP
+    # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+    isMonitorPort: false
     # - name: https
     #   port: 443
     #   targetPort: 8443
@@ -44,7 +69,13 @@ service:
     #   port: 50051
     #   targetPort: 50051
     #   protocol: TCP
+  - name: testMonitor 
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+    isMonitorPort: true
 
+# Deployment env
 env:
   ENV_VAR_NAME: value
   SPRING_PROFILES_ACTIVE: test
@@ -53,7 +84,11 @@ env:
 
 envFromSecrets:
   enabled: false
+  # secrets:
+  #   - name: secret-name
+  #     key: secret-key
 
+# filebeat env
 filebeat_env:
   SPRING_PROFILES_ACTIVE: test
   ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
@@ -67,4 +102,30 @@ imagePullSecrets:
   - name: ecr-secret
 
 serviceMonitor:
-  enabled: false
+  enabled: true
+  namespace: "monitor"
+  release: "nudex-testnet"
+  config:
+    path: /metricsxw
+    port: http-metrics
+    scheme: http
+    interval: 10s
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - matchExpressions:
+          - key: "app"
+            operator: In
+            values:
+              - "nudex-testnet"
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: "app"
+              operator: In
+              values:
+                - "nux-gateway-http"
+        topologyKey: "kubernetes.io/hostname"
+

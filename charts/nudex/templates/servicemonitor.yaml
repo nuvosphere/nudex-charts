@@ -3,12 +3,19 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ .Values.appName }}
+  namespace: {{ .Values.serviceMonitor.namespace }}
   labels:
     app: {{ .Values.appName }}
-  selector:
+    release: {{ .Values.serviceMonitor.release }}
+  selector: 
     matchLabels:
       app: {{ .Values.appName }}
-  endpoints:
-    - port: {{ .Values.service.targetPort }}
-      path: /metrics
+      release: {{ .Values.serviceMonitor.release }}
+  endpoints: 
+    {{- range .Values.service.ports }}
+    {{- if .isMonitorPort  }}
+    - port: {{ .name }}
+    {{- end }}
+    {{- end }}
+    {{- toYaml .Values.serviceMonitor.config | nindent 6}}
 {{- end}}
