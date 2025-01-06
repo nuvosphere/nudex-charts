@@ -80,7 +80,7 @@ spec:
               memory: {{ .Values.filebeatResources.limits.memory }}
       volumes:
         - emptyDir: {}
-          name: logsxw
+          name: logs
         - name: config
           configMap:
             name: {{ .Values.filebeat.configName }}
