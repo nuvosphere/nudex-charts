@@ -11,6 +11,7 @@ metadata:
     matchLabels:
       app: {{ .Values.appName }}
       release: {{ .Values.serviceMonitor.release }}
+spec:
   endpoints: 
     {{- range .Values.service.ports }}
     {{- if .isMonitorPort  }}
