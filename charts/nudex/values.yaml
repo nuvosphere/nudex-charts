@@ -118,7 +118,7 @@ affinity:
           - key: "app"
             operator: In
             values:
-              - "nudex-testnet"
+            - "nudex-testnet"
   podAntiAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       - labelSelector:
@@ -126,6 +126,6 @@ affinity:
             - key: "app"
               operator: In
               values:
-                - "nux-gateway-http"
+              - "nux-gateway-http"
         topologyKey: "kubernetes.io/hostname"
 
