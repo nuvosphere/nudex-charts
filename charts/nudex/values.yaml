@@ -103,7 +103,7 @@ imagePullSecrets:
 
 serviceMonitor:
   enabled: true
-  namespace: "monitor"
+  namespace: monitor
   release: "nudex-testnet"
   config:
     path: /metricsxw
@@ -114,18 +114,19 @@ serviceMonitor:
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
       - matchExpressions:
-          - key: "app"
-            operator: In
-            values:
-            - "nudex-testnet"
+        - key: app
+          operator: In
+          values:
+          - alex-nudex-devnet
   podAntiAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-            - key: "app"
-              operator: In
-              values:
-              - "nux-gateway-http"
-        topologyKey: "kubernetes.io/hostname"
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - alex-nux-gateway-http
+      topologyKey: kubernetes.io/hostname
 
