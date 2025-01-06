@@ -1,5 +1,5 @@
 # Deployment Name
-appName: alex-nux-gateway-http
+appName: alex-nux-test
 namespace: alex-test
 
 # Deployment Replicas
