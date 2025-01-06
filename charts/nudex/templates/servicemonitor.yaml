@@ -7,10 +7,6 @@ metadata:
   labels:
     app: {{ .Values.appName }}
     release: {{ .Values.serviceMonitor.release }}
-  selector: 
-    matchLabels:
-      app: {{ .Values.appName }}
-      release: {{ .Values.serviceMonitor.release }}
 spec:
   endpoints: 
     {{- range .Values.service.ports }}
@@ -19,4 +15,9 @@ spec:
     {{- end }}
     {{- end }}
     {{- toYaml .Values.serviceMonitor.config | nindent 6}}
+  selector: 
+    matchLabels:
+      app: {{ .Values.appName }}
+      release: {{ .Values.serviceMonitor.release }}
 {{- end}}
+
