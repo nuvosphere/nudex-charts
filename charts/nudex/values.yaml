@@ -1,6 +1,6 @@
 # Deployment Name
-appName: alex-nux-test
-namespace: alex-test
+appName: appname
+namespace: runsapce
 
 # Deployment Replicas
 replicaCount: 2
@@ -54,7 +54,7 @@ filebeatResources:
 # Deployment Service
 service:
   ports:
-  - name: alex-nux-test
+  - name: appname
     type: ClusterIP
     # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
     port: 80
@@ -69,7 +69,7 @@ service:
     #   port: 50051
     #   targetPort: 50051
     #   protocol: TCP
-  - name: testmonitor 
+  - name: monitorname 
     port: 9090
     targetPort: 9090
     protocol: TCP
@@ -96,13 +96,13 @@ filebeat_env:
   KIBANA_HOST: "kibana:5601"
 
 nodeSelector:
-  app: nudex-testnet
+  app: node-tag
 
 imagePullSecrets:
   - name: ecr-secret
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   namespace: monitor
   release: "nudex-testnet"
   config:
@@ -119,7 +119,7 @@ affinity:
         - key: app
           operator: In
           values:
-          - alex-nudex-devnet
+          - tagname
   podAntiAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
     - labelSelector:
@@ -127,6 +127,6 @@ affinity:
         - key: app
           operator: In
           values:
-          - alex-nux-gateway-http
+          - tagname
       topologyKey: kubernetes.io/hostname
 
