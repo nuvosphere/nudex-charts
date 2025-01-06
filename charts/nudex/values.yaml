@@ -54,7 +54,7 @@ filebeatResources:
 # Deployment Service
 service:
   ports:
-  - name: nux-gateway-http
+  - name: alex-nux-test
     type: ClusterIP
     # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
     port: 80
