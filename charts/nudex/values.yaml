@@ -69,7 +69,7 @@ service:
     #   port: 50051
     #   targetPort: 50051
     #   protocol: TCP
-  - name: testMonitor 
+  - name: testmonitor 
     port: 9090
     targetPort: 9090
     protocol: TCP
