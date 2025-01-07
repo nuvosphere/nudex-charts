@@ -84,23 +84,20 @@ filebeatResources:
 
 # Deployment Service
 service:
+  type: LoadBalancer
   ports:
   - name: appname
-    type: ClusterIP
     # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
     port: 80
     targetPort: 8080
     protocol: TCP
     isMonitorPort: false
   #LoadBalancer
-  # allocateLoadBalancerNodePorts: true
-  # clusterIP: 172.20.132.131
-  # clusterIPs:
-  # - 172.20.132.131
-  # externalTrafficPolicy: Cluster
-  # internalTrafficPolicy: Cluster
-  # loadBalancerClass: service.k8s.aws/nlb
-  # sessionAffinity: None
+  allocateLoadBalancerNodePorts: true
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  loadBalancerClass: service.k8s.aws/nlb
+  sessionAffinity: None
   # - name: https
   #   port: 443
   #   targetPort: 8443
