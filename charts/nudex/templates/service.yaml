@@ -21,3 +21,12 @@ spec:
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}
       {{- end }}
+      {{- if eq .Values.service.type "LoadBalancer" }}
+      allocateLoadBalancerNodePorts: {{ .Values.service.allocateLoadBalancerNodePorts }}
+      clusterIP: {{.Values.service.clusterIP }}
+      clusterIPs: {{.Values.service.clusterIPs }}
+      externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+      internalTrafficPolicy: {{ .Values.service.internalTrafficPolicy }}
+      loadBalancerClass: {{ .Values.service.loadBalancerClass }}
+      sessionAffinity: {{ .Values.service.sessionAffinity}}
+      {{- end }}

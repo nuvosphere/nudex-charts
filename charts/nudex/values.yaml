@@ -92,19 +92,28 @@ service:
     targetPort: 8080
     protocol: TCP
     isMonitorPort: false
-    # - name: https
-    #   port: 443
-    #   targetPort: 8443
-    #   protocol: TCP
-    # - name: grpc
-    #   port: 50051
-    #   targetPort: 50051
-    #   protocol: TCP
-  - name: monitorname 
-    port: 9090
-    targetPort: 9090
-    protocol: TCP
-    isMonitorPort: true
+  #LoadBalancer
+  # allocateLoadBalancerNodePorts: true
+  # clusterIP: 172.20.132.131
+  # clusterIPs:
+  # - 172.20.132.131
+  # externalTrafficPolicy: Cluster
+  # internalTrafficPolicy: Cluster
+  # loadBalancerClass: service.k8s.aws/nlb
+  # sessionAffinity: None
+  # - name: https
+  #   port: 443
+  #   targetPort: 8443
+  #   protocol: TCP
+  # - name: grpc
+  #   port: 50051
+  #   targetPort: 50051
+  #   protocol: TCP
+  # - name: monitorname 
+  #   port: 9090
+  #   targetPort: 9090
+  #   protocol: TCP
+  #   isMonitorPort: true
 
 # Deployment env
 env:
