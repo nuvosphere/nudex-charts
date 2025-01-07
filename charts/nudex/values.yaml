@@ -22,6 +22,9 @@ appResources:
   limits:
     cpu: "1"
     memory: "2Gi"
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
 
 # Deployment run command
 customArgs:

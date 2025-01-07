@@ -62,6 +62,9 @@ spec:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
               memory: {{ .Values.appResources.limits.memory }}
+            requests:
+              cpu: {{ .Values.appResources.requests.cpu }}
+              memory: {{ .Values.appResources.requests.memory }}
           livenessProbe: {{- toYaml .Values.livenessProbe | nindent 12}}
           readinessProbe: {{- toYaml .Values.readinessProbe | nindent 12}}
         - name: filebeat
