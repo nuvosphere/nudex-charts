@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.filebeat.configName }}
-namespace: {{.Values.namespace }}
+  namespace: {{.Values.namespace }}
 data:
   filebeat.yml: |-
     filebeat.inputs:

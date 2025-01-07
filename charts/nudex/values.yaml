@@ -43,7 +43,7 @@ customArgs:
   command:
   - "- java"
 
-# Deployment Health Check, add or modify customized livenessProbe  &readinessProbe
+# Deployment Health Check, add or modify customized livenessProbe  & readinessProbe
 livenessProbe:
   failureThreshold: 3
   httpGet:
