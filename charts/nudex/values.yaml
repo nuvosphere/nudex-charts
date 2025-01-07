@@ -130,9 +130,6 @@ filebeat_env:
   LOGSTASH_HOSTS: "logstash:5044"
   KIBANA_HOST: "kibana:5601"
 
-nodeSelector:
-  app: node-tag
-
 imagePullSecrets:
   - name: ecr-secret
 
