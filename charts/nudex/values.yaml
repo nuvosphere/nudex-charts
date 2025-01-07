@@ -1,6 +1,6 @@
 # Deployment Name
 appName: appname
-namespace: runsapce
+namespace: alex-test
 
 # Deployment Replicas
 replicaCount: 2
@@ -43,8 +43,9 @@ customArgs:
   command:
   - "- java"
 
-# Deployment Health Check
+# Deployment Health Check, add or modify customized livenessProbe  &readinessProbe
 livenessProbe:
+  failureThreshold: 3
   httpGet:
     path: /health
     port: 8080
@@ -52,6 +53,7 @@ livenessProbe:
   timeoutSeconds: 10
   periodSeconds: 30
 readinessProbe:
+  failureThreshold: 3
   httpGet:
     path: /health
     port: 8080
