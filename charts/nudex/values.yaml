@@ -5,6 +5,12 @@ namespace: runsapce
 # Deployment Replicas
 replicaCount: 2
 
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 1
+
 # Deployment image
 image:
   repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
@@ -16,6 +22,26 @@ appResources:
   limits:
     cpu: "1"
     memory: "2Gi"
+
+# Deployment run command
+customArgs:
+  enabled: false
+  args:
+  - "- -javaagent:/app/opentelemetry-javaagent.jar"
+  - "- -Dotel.traces.exporter=otlp"
+  - "- -Dotel.metrics.exporter=otlp"
+  - "- -Dotel.exporter.otlp.endpoint=http://otel-collector-collector.opentelemetry-operator-system:4317"
+  - "- -Dotel.resource.attributes=service.name=nux-demo-server,service.version=1.0"
+  - "- -XX:+UseZGC"
+  - "- -XX:ParallelGCThreads=2"
+  - "- -Xms256m"
+  - "- -Xmx512m"
+  - "- -XX:+UseStringDeduplication"
+  - "- -Dfile.encoding=UTF-8"
+  - "- -jar"
+  - "- ./application.jar"
+  command:
+  - "- java"
 
 # Deployment Health Check
 livenessProbe:
@@ -79,8 +105,6 @@ service:
 env:
   ENV_VAR_NAME: value
   SPRING_PROFILES_ACTIVE: test
-  # JAVA_HEAP_OPTS: -Xmx2048M -Xms1024M -XX:MaxDirectMemorySize=128M
-  # JAVA_OPTS: -Dspring.profiles.active=default
 
 envFromSecrets:
   enabled: false

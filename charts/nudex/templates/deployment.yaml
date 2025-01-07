@@ -10,6 +10,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.appName }}
+  strategy: {{- toYaml .Values.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -22,6 +23,23 @@ spec:
             {{- toYaml .Values.affinity.podAntiAffinity | nindent 10 }}
       containers:
         - name: {{ .Values.appName }}
+          {{- if .Values.customArgs.enabled }}
+          args:
+            {{- range .Values.customArgs.args }}
+            {{ . }}
+            {{- end }}
+          command:
+            {{- range.Values.customArgs.command }}
+            {{. }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.env }}
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.envFromSecrets.enabled }}
