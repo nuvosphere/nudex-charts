@@ -26,26 +26,6 @@ appResources:
     cpu: "200m"
     memory: "512Mi"
 
-# Deployment run command
-customArgs:
-  enabled: false
-  args:
-  - "- -javaagent:/app/opentelemetry-javaagent.jar"
-  - "- -Dotel.traces.exporter=otlp"
-  - "- -Dotel.metrics.exporter=otlp"
-  - "- -Dotel.exporter.otlp.endpoint=http://otel-collector-collector.opentelemetry-operator-system:4317"
-  - "- -Dotel.resource.attributes=service.name=nux-demo-server,service.version=1.0"
-  - "- -XX:+UseZGC"
-  - "- -XX:ParallelGCThreads=2"
-  - "- -Xms256m"
-  - "- -Xmx512m"
-  - "- -XX:+UseStringDeduplication"
-  - "- -Dfile.encoding=UTF-8"
-  - "- -jar"
-  - "- ./application.jar"
-  command:
-  - "- java"
-
 # Deployment Health Check, add or modify customized livenessProbe  & readinessProbe
 livenessProbe:
   failureThreshold: 3
@@ -84,7 +64,7 @@ filebeatResources:
 
 # Deployment Service
 service:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - name: appname
     # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
@@ -92,12 +72,6 @@ service:
     targetPort: 8080
     protocol: TCP
     isMonitorPort: false
-  #LoadBalancer
-  allocateLoadBalancerNodePorts: true
-  externalTrafficPolicy: Cluster
-  internalTrafficPolicy: Cluster
-  loadBalancerClass: service.k8s.aws/nlb
-  sessionAffinity: None
   # - name: https
   #   port: 443
   #   targetPort: 8443
@@ -161,4 +135,3 @@ affinity:
           values:
           - tagname
       topologyKey: kubernetes.io/hostname
-

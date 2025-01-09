@@ -23,16 +23,6 @@ spec:
             {{- toYaml .Values.affinity.podAntiAffinity | nindent 10 }}
       containers:
         - name: {{ .Values.appName }}
-          {{- if .Values.customArgs.enabled }}
-          args:
-            {{- range .Values.customArgs.args }}
-            {{ . }}
-            {{- end }}
-          command:
-            {{- range.Values.customArgs.command }}
-            {{. }}
-            {{- end }}
-          {{- end }}
           {{- if .Values.env }}
           env:
             {{- range $key, $value := .Values.env }}
