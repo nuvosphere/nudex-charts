@@ -11,12 +11,6 @@ strategy:
     maxUnavailable: 1
     maxSurge: 1
 
-# Deployment image
-image:
-  repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
-  tag: nux-gateway-http-latest
-  pullPolicy: Always
-
 # Deployment Resources
 appResources:
   limits:

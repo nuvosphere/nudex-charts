@@ -30,8 +30,7 @@ spec:
               value: {{ $value | quote }}
           {{- end }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: amazoncorretto:17
           {{- if .Values.envFromSecrets.enabled }}
           envFrom:
             {{- range .Values.envFromSecrets.secrets }}
