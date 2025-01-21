@@ -2,6 +2,7 @@
 appName: appname
 namespace: alex-test
 
+#add annotations
 annotations:
   enabled: false
 
