@@ -15,6 +15,7 @@ image:
   tag: nux-gateway-http-latest
   pullPolicy: Always
 
+#deploy status
 strategy:
   type: RollingUpdate
   rollingUpdate:
