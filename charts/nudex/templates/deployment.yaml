@@ -41,6 +41,7 @@ spec:
           {{- end }}
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.envFromSecrets.enabled }}
           envFrom:
             {{- range .Values.envFromSecrets.secrets }}
