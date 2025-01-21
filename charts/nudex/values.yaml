@@ -2,6 +2,9 @@
 appName: appname
 namespace: alex-test
 
+annotations:
+  enabled: false
+
 # Deployment Replicas
 replicaCount: 2
 
@@ -55,6 +58,9 @@ filebeatResources:
   limits:
     cpu: "500m"
     memory: "200Mi"
+  requests:
+    cpu: "100m"
+    memory: "100Mi"
 
 # Deployment Service
 service:
@@ -83,7 +89,6 @@ service:
 # Deployment env
 env:
   ENV_VAR_NAME: value
-  SPRING_PROFILES_ACTIVE: test
 
 envFromSecrets:
   enabled: false

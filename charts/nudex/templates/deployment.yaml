@@ -1,6 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  {{- if .Values.annotations.enabled }}
+  annotations: 
+  {{- with .Values.annotations }}
+   {{- range $key, $value := . }}
+    {{- if ne $key "enabled" }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+   {{- end }}
+  {{- end }}
+  {{- end  }}
   name: {{ .Values.appName }}
   labels:
     app: {{ .Values.appName }}
@@ -76,6 +86,9 @@ spec:
             limits:
               cpu: {{ .Values.filebeatResources.limits.cpu }}
               memory: {{ .Values.filebeatResources.limits.memory }}
+            requests:
+              cpu: {{ .Values.filebeatResources.requests.cpu }}
+              memory: {{ .Values.filebeatResources.requests.memory }}
       volumes:
         - emptyDir: {}
           name: logs
