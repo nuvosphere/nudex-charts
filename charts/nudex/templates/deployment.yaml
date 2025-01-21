@@ -40,11 +40,7 @@ spec:
               value: {{ $value | quote }}
           {{- end }}
           {{- end }}
-          # Deployment image
-          image:
-            repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
-            tag: nux-gateway-http-latest
-            pullPolicy: Always
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           {{- if .Values.envFromSecrets.enabled }}
           envFrom:
             {{- range .Values.envFromSecrets.secrets }}
