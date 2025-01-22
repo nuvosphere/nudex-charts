@@ -54,6 +54,10 @@ appResources:
     cpu: "1"
     memory: "2Gi"
 
+
+annotations:
+  enabled: false
+
 livenessProbe:
   failureThreshold: 3
   tcpSocket:
