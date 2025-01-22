@@ -27,24 +27,19 @@ spec:
       labels:
         app: {{ .Values.appName }}
     spec:
-      affinity:
-        nodeAffinity:
-{{- if .Values.nodeAffinity }}
-  {{- if .Values.nodeAffinity.enabled}}
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: relayerapp
-                operator: In
-                values:
-                -  {{ .Values.nodeAffinity.name }}
+      {{- if .Values.serviceAccount.enabled }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}
-      serviceAccountName: {{ .Values.serviceAccount }}
-  {{- end }}
-{{- end }}  
+      affinity:
+        nodeAffinity: 
+            {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Values.appName }}-configmap  
       {{- if .Values.mountsecret }}
       {{- if .Values.mountsecret.enable }}
-      volumes:
       - name: secrets-store-inline
         csi:
           driver: secrets-store.csi.k8s.io
@@ -54,7 +49,7 @@ spec:
       {{- end }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
@@ -77,6 +72,10 @@ spec:
               protocol: TCP
             {{- end }}
           volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
             - name: data
               mountPath: /app/db
             - name: secrets-store-inline

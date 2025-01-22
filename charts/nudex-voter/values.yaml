@@ -3,9 +3,13 @@ namespace: default
 
 replicaCount: 1
 
+annotations:
+  enabled: false
+
+
 image:
-  repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
-  tag: nudex-voter-latest
+  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-nudex-voter
+  tag: latest
   pullPolicy: Always
 
 service:
@@ -14,15 +18,12 @@ service:
     - name: http
       port: 8080
       targetPort: 8080
-    - name: grpc
-      port: 50051
-      targetPort: 50051
     - name: p2p
       port: 4001
       targetPort: 4001
 
 persistence:
-  size: 40Gi
+  size: 50Gi
   storageClass: "gp3"
 
 
@@ -35,16 +36,26 @@ strategy:
 
 envFromSecrets:
 
-nodeAffinity:
-  enabled: false
-  name: nudex-voter
-hostNetwork: false
-serviceAccount: nudex-voter-secret
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: voter
+          operator: In
+          values:
+          - nudex-voter-node1
+hostNetwork: true
+
 
 mountsecret:
   enable: false
   secretProviderClass: nudex-voter-secrets
   secretName: awscredentials
+
+serviceAccount: 
+  enable: false
+  name: nudex-voter-secret
 
 appResources:
   limits:
@@ -54,9 +65,6 @@ appResources:
     cpu: "1"
     memory: "2Gi"
 
-
-annotations:
-  enabled: false
 
 livenessProbe:
   failureThreshold: 3
@@ -73,4 +81,4 @@ readinessProbe:
   timeoutSeconds: 10
   periodSeconds: 10
 env:
-  LIBP2P_BOOT_NODES: "/ip4/192.168.10.2/tcp/4001/p2p/12D3KooWPxRKQ8mrJspeyppXDbh8SdXq27jVD9p1CmVdi8nmPnq6"
+  ENV_VAR_NAME: "value"

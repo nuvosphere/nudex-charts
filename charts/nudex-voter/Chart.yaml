@@ -2,5 +2,5 @@ apiVersion: v2
 name: nudex-voter
 description: A Helm chart for deploying Nudex voter
 type: application
-version: 0.0.1
+version: 0.0.2
 appVersion: "1.0.0"
