@@ -78,9 +78,9 @@ spec:
               readOnly: true
             - name: data
               mountPath: /app/db
-            - name: secrets-store-inline
-              mountPath: "/mnt/secrets-store"
-              readOnly: true
+            # - name: secrets-store-inline
+            #   mountPath: "/mnt/secrets-store"
+            #   readOnly: true
           resources:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
