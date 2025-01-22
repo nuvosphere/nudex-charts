@@ -94,6 +94,16 @@ entries:
   nudex-voter:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-01-22T14:07:49.536487186Z"
+    description: A Helm chart for deploying Nudex voter
+    digest: 437a6fdea9c9de4d031511adc37411feb9a3f7fb4c8cf423b4e632b3bc0de265
+    name: nudex-voter
+    type: application
+    urls:
+    - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-voter-0.0.3/nudex-voter-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2025-01-22T13:33:02.057455805Z"
     description: A Helm chart for deploying Nudex voter
     digest: 9984fdd2aaeeda6630c4c30e5424a16113af464d95bb7d6954432730ef6c9f1f
@@ -112,4 +122,4 @@ entries:
     urls:
     - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-voter-0.0.1/nudex-voter-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-22T13:33:02.057482665Z"
+generated: "2025-01-22T14:07:49.536658172Z"
