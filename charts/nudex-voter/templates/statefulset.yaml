@@ -21,7 +21,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.appName }}
-  updateStrategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
+  updateStrategy: {{- toYaml .Values.updateStrategy | nindent 3 }}
   template:
     metadata:
       labels:
