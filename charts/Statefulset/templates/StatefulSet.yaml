@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+  {{- if .Values.annotations.enabled }}
+  annotations:
+    {{- with .Values.annotations }}
+    {{- range $key, $value := . }}
+      {{- if ne $key "enabled" }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+spec:
+  serviceName: "{{ .Values.appName }}-service"
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  updateStrategy:
+    type: {{ .Values.strategy.type | default "RollingUpdate" }}
+    {{- if eq .Values.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable | default 1 }}
+      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge | default 1 }}
+    {{- end }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+    spec:
+      affinity:
+        nodeAffinity:
+          {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
+        podAntiAffinity:
+          {{- toYaml .Values.affinity.podAntiAffinity | nindent 10 }}
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: snapshot-volume
+              mountPath: /data/snapshot
+            - name: jspottrade-volume
+              mountPath: /data/spot
+          resources:
+            limits:
+              cpu: {{ .Values.appResources.limits.cpu }}
+              memory: {{ .Values.appResources.limits.memory }}
+            requests:
+              cpu: {{ .Values.appResources.requests.cpu }}
+              memory: {{ .Values.appResources.requests.memory }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+      initContainers:
+        {{- if .Values.initContainers.enabled }}
+        - name: {{ .Values.initContainers.name }}
+          image: {{ .Values.initContainers.image }}
+          command: {{ .Values.initContainers.command | toYaml | nindent 12 }}
+          volumeMounts:
+            - name: jspottrade-volume
+              mountPath: /data/spot
+        {{- end }}
+      volumeClaimTemplates:
+        {{- if .Values.volumeClaimTemplates.enabled }}
+        {{- range .Values.volumeClaimTemplates }}
+        - metadata:
+            name: {{ .name }}
+          spec:
+            accessModes: {{ .accessModes | toYaml | nindent 8 }}
+            resources:
+              requests:
+                storage: {{ .resources.requests.storage }}
+            storageClassName: {{ .storageClassName }}
+            volumeMode: {{ .volumeMode }}
+        {{- end }}
+        {{- end }}

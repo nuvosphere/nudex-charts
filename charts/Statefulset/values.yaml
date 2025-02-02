@@ -1,0 +1,81 @@
+# StatefulSet 配置
+appName: nudex-spot-trade-server
+namespace: exchange
+
+# 是否启用 annotations
+annotations:
+  enabled: false
+  app: "nudex-spot"
+
+# 副本数量
+replicaCount: 3
+
+# 镜像配置
+image:
+  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-spot-trade
+  tag: 20250128
+  pullPolicy: Always
+
+# StatefulSet 更新策略
+strategy:
+  type: RollingUpdate  # 可选择 RollingUpdate 或 OnDelete
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 1
+
+# 资源限制与请求
+appResources:
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+
+# initContainers 配置
+initContainers:
+  enabled: true
+  name: init-create-dir
+  image: busybox:1.34
+  command:
+    - "/bin/sh"
+    - "-c"
+    - |
+        if [ ! -d "/data/spot/$(POD_NAME)" ]; then
+          echo "Directory /data/spot/$(POD_NAME) does not exist. Creating it..."
+          mkdir -p /data/spot/$(POD_NAME)
+        fi
+  volume:
+    name: jspottrade-volume
+    mountPath: /data/spot
+
+# 其他环境变量配置
+env:
+  ENV_VAR_NAME: value
+
+# 文件beat 配置
+filebeat:
+  enabled: true
+  image:
+    repository: docker.elastic.co/beats/filebeat
+    tag: 7.10.1
+    pullPolicy: Always
+  configName: filebeat-config
+
+# PVC 配置
+volumeClaimTemplates:
+  enabled: true
+  - name: snapshot-volume
+    accessModes: ["ReadWriteMany"]
+    resources:
+      requests:
+        storage: 50Gi
+    storageClassName: spot-trade-sc
+    volumeMode: Filesystem
+  - name: jspottrade-volume
+    accessModes: ["ReadWriteMany"]
+    resources:
+      requests:
+        storage: 50Gi
+    storageClassName: spot-trade-sc
+    volumeMode: Filesystem
