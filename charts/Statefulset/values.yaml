@@ -62,20 +62,61 @@ filebeat:
     pullPolicy: Always
   configName: filebeat-config
 
+# Deployment Service
+service:
+  type: ClusterIP
+  ports:
+  - name: appname
+    # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+    isMonitorPort: false
+
+serviceMonitor:
+  enabled: false
+  namespace: monitor
+  release: "nudex-testnet"
+  config:
+    path: /metricsxw
+    port: http-metrics
+    scheme: http
+    interval: 10s
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - tagname
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - tagname
+      topologyKey: kubernetes.io/hostname
+
 # PVC 配置
 volumeClaimTemplates:
   enabled: true
-  - name: snapshot-volume
-    accessModes: ["ReadWriteMany"]
-    resources:
-      requests:
-        storage: 50Gi
-    storageClassName: spot-trade-sc
-    volumeMode: Filesystem
-  - name: jspottrade-volume
-    accessModes: ["ReadWriteMany"]
-    resources:
-      requests:
-        storage: 50Gi
-    storageClassName: spot-trade-sc
-    volumeMode: Filesystem
+  items:
+    - name: snapshot-volume
+      accessModes: "ReadWriteMany"
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: spot-trade-sc
+      volumeMode: Filesystem
+    - name: jspottrade-volume
+      accessModes: "ReadWriteMany"
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: spot-trade-sc
+      volumeMode: Filesystem

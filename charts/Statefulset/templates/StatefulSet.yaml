@@ -76,11 +76,11 @@ spec:
         {{- end }}
       volumeClaimTemplates:
         {{- if .Values.volumeClaimTemplates.enabled }}
-        {{- range .Values.volumeClaimTemplates }}
+        {{- range .Values.volumeClaimTemplates.items }}
         - metadata:
             name: {{ .name }}
           spec:
-            accessModes: {{ .accessModes | toYaml | nindent 8 }}
+            accessModes: [{{ .accessModes |quote }}]
             resources:
               requests:
                 storage: {{ .resources.requests.storage }}
