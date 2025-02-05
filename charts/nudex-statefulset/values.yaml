@@ -104,7 +104,6 @@ affinity:
 
 # PVC 配置
 volumeClaimTemplates:
-  enabled: true
   items:
     - name: snapshot-volume
       accessModes: ReadWriteOnce

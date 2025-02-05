@@ -77,7 +77,6 @@ spec:
             {{- end }}
         {{- end }}
       volumeClaimTemplates:
-        {{- if .Values.volumeClaimTemplates.enabled }}
         {{- range .Values.volumeClaimTemplates.items }}
         - metadata:
             name: {{ .name }}
@@ -88,5 +87,4 @@ spec:
                 storage: {{ .resources.requests.storage }}
             storageClassName: {{ .storageClassName }}
             volumeMode: {{ .volumeMode }}
-        {{- end }}
         {{- end }}
