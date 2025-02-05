@@ -23,8 +23,7 @@ spec:
     type: {{ .Values.strategy.type | default "RollingUpdate" }}
     {{- if eq .Values.strategy.type "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable | default 1 }}
-      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge | default 1 }}
+      partition: 0
     {{- end }}
   template:
     metadata:

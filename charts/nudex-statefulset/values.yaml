@@ -19,9 +19,6 @@ image:
 # StatefulSet 更新策略
 strategy:
   type: RollingUpdate  # 可选择 RollingUpdate 或 OnDelete
-  rollingUpdate:
-    maxUnavailable: 1
-    maxSurge: 1
 
 # 资源限制与请求
 appResources:
