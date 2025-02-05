@@ -65,8 +65,8 @@ spec:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
+      {{- if .Values.initContainers.enabled }}
       initContainers:
-        {{- if .Values.initContainers.enabled }}
         - name: {{ .Values.initContainers.name }}
           image: {{ .Values.initContainers.image }}
           command: {{ .Values.initContainers.command | toYaml | nindent 12 }}
@@ -75,7 +75,7 @@ spec:
             - name: {{ .name }}
               mountPath: {{ .initContainerMountPath | quote }}
             {{- end }}
-        {{- end }}
+      {{- end }}
   volumeClaimTemplates:
     {{- range .Values.volumeClaimTemplates.items }}
     - metadata:
