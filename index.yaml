@@ -94,6 +94,16 @@ entries:
   nudex-statefulset:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-02-05T12:46:14.697630412Z"
+    description: A Helm chart for deploying nudex
+    digest: e6103b6f23e239ffa4b2b04252bd3a421b90706658cd7c8e798ec5fdd9ff68a2
+    name: nudex-statefulset
+    type: application
+    urls:
+    - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-statefulset-0.0.8/nudex-statefulset-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2025-02-05T06:05:05.513701214Z"
     description: A Helm chart for deploying nudex
     digest: 9c9aa1db1c48547b3ff5f91297750abee1b20e4bb1180e9d5092b3c8fe396d6c
@@ -193,4 +203,4 @@ entries:
     urls:
     - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-voter-0.0.1/nudex-voter-0.0.1.tgz
     version: 0.0.1
-generated: "2025-02-05T06:05:05.513751428Z"
+generated: "2025-02-05T12:46:14.697684394Z"
