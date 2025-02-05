@@ -1,5 +1,6 @@
 {{- if .Values.volumeClaimTemplates.sharePvc }}
 {{- range .Values.volumeClaimTemplates.pvItems }}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
