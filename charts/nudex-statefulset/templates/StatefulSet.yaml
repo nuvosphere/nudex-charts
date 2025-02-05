@@ -76,15 +76,15 @@ spec:
               mountPath: {{ .initContainerMountPath | quote }}
             {{- end }}
         {{- end }}
-      volumeClaimTemplates:
-        {{- range .Values.volumeClaimTemplates.items }}
-        - metadata:
-            name: {{ .name }}
-          spec:
-            accessModes: [{{ .accessModes |quote }}]
-            resources:
-              requests:
-                storage: {{ .resources.requests.storage }}
-            storageClassName: {{ .storageClassName }}
-            volumeMode: {{ .volumeMode }}
-        {{- end }}
+  volumeClaimTemplates:
+    {{- range .Values.volumeClaimTemplates.items }}
+    - metadata:
+        name: {{ .name }}
+      spec:
+        accessModes: [{{ .accessModes |quote }}]
+        resources:
+          requests:
+            storage: {{ .resources.requests.storage }}
+        storageClassName: {{ .storageClassName }}
+        volumeMode: {{ .volumeMode }}
+    {{- end }}
