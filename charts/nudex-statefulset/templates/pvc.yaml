@@ -1,0 +1,16 @@
+{{- if .Values.volumeClaimTemplates.sharePvc }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: {{ .Values.namespace }}
+  {{- range .Values.volumeClaimTemplates.pvItems }}
+  name: {{ .name }}
+spec:
+  accessModes: {{ .accessModes |quote }}  # EFS 支持 ReadWriteMany 模式
+  resources:
+    requests:
+      storage: {{ .resources.requests.storage }}
+  storageClassName: {{ .storageClassName }} # 对应的 StorageClass
+  volumeMode: {{ .volumeMode }}  # EFS 是文件系统类型
+  {{- end }}
+{{- end }}
