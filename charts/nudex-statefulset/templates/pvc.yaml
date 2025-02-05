@@ -1,9 +1,9 @@
 {{- if .Values.volumeClaimTemplates.sharePvc }}
+{{- range .Values.volumeClaimTemplates.pvItems }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: {{ .Values.namespace }}
-  {{- range .Values.volumeClaimTemplates.pvItems }}
+  namespace: {{ .namespace }}
   name: {{ .name }}
 spec:
   accessModes: {{ .accessModes |quote }}  # EFS 支持 ReadWriteMany 模式

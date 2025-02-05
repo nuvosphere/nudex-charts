@@ -105,7 +105,7 @@ volumeClaimTemplates:
   enabled: false # pod 独享目录
   pvItems:
     - name: snapshot-volume
-      accessModes: ReadWriteOnce
+      accessModes: ReadWriteMany
       resources:
         requests:
           storage: 50Gi
@@ -114,9 +114,10 @@ volumeClaimTemplates:
       mountPath: /data/snapshot
       initContainerMountPath: /data/spot-init
       efsServer: "fs-0f763c1b3767139a1"
+      namespace: exchange
 
     - name: jspottrade-volume
-      accessModes: ReadWriteOnce
+      accessModes: ReadWriteMany
       resources:
         requests:
           storage: 50Gi
@@ -125,6 +126,7 @@ volumeClaimTemplates:
       mountPath: /data/spot
       initContainerMountPath: /data/spot-init
       efsServer: "fs-0f763c1b3767139a1"
+      namespace: exchange
 
 # Health Check, add or modify customized livenessProbe  & readinessProbe
 livenessProbe:
