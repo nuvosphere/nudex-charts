@@ -50,10 +50,10 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
           volumeMounts:
-            - name: snapshot-volume
-              mountPath: /data/snapshot
-            - name: jspottrade-volume
-              mountPath: /data/spot
+            {{- range .Values.volumeClaimTemplates.items }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath | quote }}
+            {{- end }}
           resources:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
@@ -71,8 +71,10 @@ spec:
           image: {{ .Values.initContainers.image }}
           command: {{ .Values.initContainers.command | toYaml | nindent 12 }}
           volumeMounts:
-            - name: jspottrade-volume
-              mountPath: /data/spot
+            {{- range .Values.volumeClaimTemplates.items }}
+            - name: {{ .name }}
+              mountPath: {{ .initContainerMountPath | quote }}
+            {{- end }}
         {{- end }}
       volumeClaimTemplates:
         {{- if .Values.volumeClaimTemplates.enabled }}

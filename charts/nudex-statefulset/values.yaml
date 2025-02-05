@@ -107,16 +107,21 @@ volumeClaimTemplates:
   enabled: true
   items:
     - name: snapshot-volume
-      accessModes: "ReadWriteMany"
+      accessModes: ReadWriteOnce
       resources:
         requests:
           storage: 50Gi
       storageClassName: spot-trade-sc
       volumeMode: Filesystem
+      mountPath: /data/snapshot
+      initContainerMountPath: /data/spot-init
+
     - name: jspottrade-volume
-      accessModes: "ReadWriteMany"
+      accessModes: ReadWriteOnce
       resources:
         requests:
           storage: 50Gi
       storageClassName: spot-trade-sc
       volumeMode: Filesystem
+      mountPath: /data/spot
+      initContainerMountPath: /data/spot-init
