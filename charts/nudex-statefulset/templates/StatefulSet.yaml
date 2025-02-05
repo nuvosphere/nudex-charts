@@ -81,7 +81,7 @@ spec:
     - metadata:
         name: {{ .name }}
       spec:
-        accessModes: {{ .accessModes |quote }}
+        accessModes: [{{ .accessModes |quote }}]
         resources:
           requests:
             storage: {{ .resources.requests.storage }}
