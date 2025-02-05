@@ -35,6 +35,14 @@ spec:
           {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
         podAntiAffinity:
           {{- toYaml .Values.affinity.podAntiAffinity | nindent 10 }}
+      {{- if .Values.volumeClaimTemplates.sharePvc }}
+      volumes:
+      {{- range .Values.volumeClaimTemplates.pvItems }}
+      - name: {{ .name }}
+        persistentVolumeClaim:
+          claimName: {{ .name }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
