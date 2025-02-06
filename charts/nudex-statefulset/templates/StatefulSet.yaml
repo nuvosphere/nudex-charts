@@ -37,6 +37,11 @@ spec:
           {{- toYaml .Values.affinity.podAntiAffinity | nindent 10 }}
       {{- if .Values.volumeClaimTemplates.sharePvc }}
       volumes:
+      - emptyDir: {}
+        name: logs
+      - name: config
+        configMap:
+          name: {{ .Values.filebeat.configName }}
       {{- range .Values.volumeClaimTemplates.pvItems }}
       - name: {{ .name }}
         persistentVolumeClaim:
@@ -72,6 +77,29 @@ spec:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
+        - name: filebeat
+          image: "{{ .Values.filebeat.image.repository }}:{{ .Values.filebeat.image.tag }}"
+          imagePullPolicy: {{ .Values.filebeat.image.pullPolicy }}
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: "{{ .Values.filebeat_env.ELASTICSEARCH_HOSTS }}"
+            - name: LOGSTASH_HOSTS
+              value: "{{ .Values.filebeat_env.LOGSTASH_HOSTS }}"
+            - name: KIBANA_HOST
+              value: "{{ .Values.filebeat_env.KIBANA_HOST }}"
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs/{{ .Values.appName }}
+            - name: config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+          resources:
+            limits:
+              cpu: {{ .Values.filebeatResources.limits.cpu }}
+              memory: {{ .Values.filebeatResources.limits.memory }}
+            requests:
+              cpu: {{ .Values.filebeatResources.requests.cpu }}
+              memory: {{ .Values.filebeatResources.requests.memory }}
       {{- if .Values.initContainers.enabled }}
       initContainers:
         - name: {{ .Values.initContainers.name }}

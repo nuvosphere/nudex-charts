@@ -58,6 +58,22 @@ filebeat:
     tag: 7.10.1
     pullPolicy: Always
   configName: filebeat-config
+  logstashHost: "output-logstash.default:5045"
+
+filebeatResources:
+  limits:
+    cpu: "500m"
+    memory: "200Mi"
+  requests:
+    cpu: "100m"
+    memory: "100Mi"
+
+# filebeat env
+filebeat_env:
+  SPRING_PROFILES_ACTIVE: test
+  ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+  LOGSTASH_HOSTS: "logstash:5044"
+  KIBANA_HOST: "kibana:5601"
 
 # Deployment Service
 service:
