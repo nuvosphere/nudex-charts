@@ -1,26 +1,92 @@
 # Deployment Name
-appName: appname
-namespace: alex-test
+appName: nux-deposit-tracker
+namespace: default
+
+# Deployment Replicas
+replicaCount: 1
 
 #add annotations
 annotations:
   enabled: false
 
-# Deployment Replicas
-replicaCount: 2
+#add configmap
+appcm:
+  enabled: false
+  name: nux-deposit-tracker-cm
+  namespace: default
+  data:
+    spring:
+      profiles:
+        active: ${SPRING_PROFILES_ACTIVE}
+    server:
+      port: 8080
+    logging:
+      level:
+        root: info
+        org.springframework.web: info
 
-# Deployment image
-image:
-  repository: 590184059249.dkr.ecr.us-east-2.amazonaws.com/nudex/nudex-server
-  tag: nux-gateway-http-latest
-  pullPolicy: Always
-
-#deploy status
 strategy:
   type: RollingUpdate
   rollingUpdate:
-    maxUnavailable: 1
-    maxSurge: 1
+    maxSurge: 25%
+    maxUnavailable: 25%
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - nudex-devnet
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - nux-wallet-service
+      topologyKey: kubernetes.io/hostname
+
+# Deployment env
+env:
+  ENV_VAR_NAME: value
+  SPRING_PROFILES_ACTIVE: dev
+  ENV_FILE: .dev.env
+
+envFromSecrets:
+  enabled: true
+  namespace: default
+  secret_name: deposit-secrets
+  secrets:
+    - name: deposit_task_private_key
+      key: "0xdd4ae923532c8b47440db5497bf0591769969d3da3ed6ac1d7c2a037033404e9"
+    - name: consolidation_task_private_key
+      key: "0xdd4ae923532c8b47440db5497bf0591769969d3da3ed6ac1d7c2a037033404e9"
+
+# PVC 配置
+volumeClaimTemplates:
+  sharePvc: false # pod 共享目录
+  enabled: true # pod 独享目录
+  pvItems:
+    - name: deposit-tracker
+      accessModes: ReadWriteMany
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: spot-trade-sc
+      volumeMode: Filesystem
+      mountPath: /app/data
+      efsServer: "fs-0f763c1b3767139a1"
+      namespace: exchange
+
+# Deployment image
+image:
+  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-nudex-deposit-tracker
+  tag: latest
+  pullPolicy: Always
 
 # Deployment Resources
 appResources:
@@ -28,30 +94,51 @@ appResources:
     cpu: "1"
     memory: "2Gi"
   requests:
-    cpu: "200m"
-    memory: "512Mi"
+    cpu: "1"
+    memory: "2Gi"
 
-# Deployment Health Check, add or modify customized livenessProbe  & readinessProbe
+# Deployment Health Check
 livenessProbe:
   failureThreshold: 3
   httpGet:
     path: /health
     port: 8080
+    scheme: HTTP
   initialDelaySeconds: 30
   timeoutSeconds: 10
+  successThreshold: 1
   periodSeconds: 30
 readinessProbe:
   failureThreshold: 3
+  successThreshold: 1
   httpGet:
     path: /health
     port: 8080
+    scheme: HTTP
   initialDelaySeconds: 30
   timeoutSeconds: 10
   periodSeconds: 30
-# path: /health
-# initialDelaySeconds: 30
-# timeoutSeconds: 10
-# periodSeconds: 30
+
+# Deployment Service
+service:
+  ports:
+  - name: nux-tracker
+    type: ClusterIP
+    # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+    isMonitorPort: false
+  # - name: healthcheck
+  #   type: ClusterIP
+  #   port: 8080
+  #   targetPort: 8080
+  #   protocol: TCP
+  #   isMonitorPort: false
+
+#default  image secret
+imagePullSecrets:
+  - name: new-ecr-secret
 
 # filebeat config default
 filebeat:
@@ -59,7 +146,7 @@ filebeat:
     repository: docker.elastic.co/beats/filebeat
     tag: 7.10.1
     pullPolicy: Always
-  configName: "filebeat-config"
+  configName: "tracker-fb-cm"
   logstashHost: "output-logstash.default:5045"
 
 filebeatResources:
@@ -70,49 +157,11 @@ filebeatResources:
     cpu: "100m"
     memory: "100Mi"
 
-# Deployment Service
-service:
-  type: ClusterIP
-  ports:
-  - name: appname
-    # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
-    port: 80
-    targetPort: 8080
-    protocol: TCP
-    isMonitorPort: false
-  # - name: https
-  #   port: 443
-  #   targetPort: 8443
-  #   protocol: TCP
-  # - name: grpc
-  #   port: 50051
-  #   targetPort: 50051
-  #   protocol: TCP
-  # - name: monitorname 
-  #   port: 9090
-  #   targetPort: 9090
-  #   protocol: TCP
-  #   isMonitorPort: true
-
-# Deployment env
-env:
-  ENV_VAR_NAME: value
-
-envFromSecrets:
-  enabled: false
-  # secrets:
-  #   - name: secret-name
-  #     key: secret-key
-
 # filebeat env
 filebeat_env:
-  SPRING_PROFILES_ACTIVE: test
   ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
   LOGSTASH_HOSTS: "logstash:5044"
   KIBANA_HOST: "kibana:5601"
-
-imagePullSecrets:
-  - name: new-ecr-secret
 
 serviceMonitor:
   enabled: false
@@ -123,22 +172,3 @@ serviceMonitor:
     port: http-metrics
     scheme: http
     interval: 10s
-
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - tagname
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - tagname
-      topologyKey: kubernetes.io/hostname
