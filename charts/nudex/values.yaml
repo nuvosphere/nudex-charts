@@ -14,16 +14,6 @@ appcm:
   enabled: false
   name: nux-deposit-tracker-cm
   namespace: default
-  data:
-    spring:
-      profiles:
-        active: ${SPRING_PROFILES_ACTIVE}
-    server:
-      port: 8080
-    logging:
-      level:
-        root: info
-        org.springframework.web: info
 
 strategy:
   type: RollingUpdate
@@ -68,8 +58,7 @@ envFromSecrets:
 
 # PVC 配置
 volumeClaimTemplates:
-  sharePvc: false # pod 共享目录
-  enabled: true # pod 独享目录
+  sharePvc: true # pod 共享目录
   pvItems:
     - name: deposit-tracker
       accessModes: ReadWriteMany

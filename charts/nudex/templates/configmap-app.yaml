@@ -1,9 +1,0 @@
-{{- if .Values.appcm.enabled }}
-appVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.appcm.name }}
-  namespace: {{.Values.appcm.namespace }}
-data:
-  {{- toYaml .Values.appcm.data | nindent 2 }}
-{{- end }}
