@@ -12,8 +12,9 @@ annotations:
 #add configmap
 appcm:
   enabled: false
-  name: nux-deposit-tracker-cm
-  namespace: default
+  # name: nux-deposit-tracker-cm
+  # namespace: default
+  # data:
 
 strategy:
   type: RollingUpdate
@@ -37,7 +38,7 @@ affinity:
         - key: app
           operator: In
           values:
-          - nux-wallet-service
+          - nux-deposit-tracker
       topologyKey: kubernetes.io/hostname
 
 # Deployment env
@@ -69,7 +70,7 @@ volumeClaimTemplates:
       volumeMode: Filesystem
       mountPath: /app/data
       efsServer: "fs-0f763c1b3767139a1"
-      namespace: exchange
+      namespace: default
 
 # Deployment image
 image:
@@ -80,8 +81,8 @@ image:
 # Deployment Resources
 appResources:
   limits:
-    cpu: "1"
-    memory: "2Gi"
+    cpu: "4"
+    memory: "8Gi"
   requests:
     cpu: "1"
     memory: "2Gi"

@@ -56,6 +56,12 @@ spec:
           volumeMounts:
             - name: logs
               mountPath: /app/logs/{{ .Values.appName }}
+            {{- if .Values.volumeClaimTemplates.sharePvc }}
+            {{- range .Values.volumeClaimTemplates.pvItems }}
+            - name: {{ .name }}
+              mountPath: {{.mountPath }}
+            {{- end }}
+            {{- end }} 
             {{- if .Values.appcm.enabled }}
             - name: {{.Values.appcm.name }}
               mountPath: /app/config/{{.Values.appName }}.json
