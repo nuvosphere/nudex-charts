@@ -10,6 +10,29 @@ annotations:
 # 副本数量
 replicaCount: 3
 
+appcm:
+  enabled: true
+  namespace: default
+  datas:
+  - name: demo-1
+    mountPath: /app/config
+    subPath: demo-1.config
+  - name: demo-2
+    mountPath: /app/config-2
+    subPath: demo-2.config
+
+secretEnv:
+  enabled: true
+  secrets:
+  - secretName: demo-1-name
+    keys:
+    - keyName: demo-1-key
+    - keyName: demo-2-key
+  - secretName: demo-2-name
+    keys:
+    - keyName: demo-3-key
+    - keyName: demo-4-key
+
 # 镜像配置
 image:
   repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-spot-trade

@@ -48,6 +48,20 @@ spec:
           claimName: {{ .name }}
       {{- end }}
       {{- end }}
+      {{- if .Values.appcm.enabled }}
+      {{- range .Values.appcm.datas }}
+      - name: {{ .name }}
+        configMap:
+          name: {{ .name }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.secretEnv.enabled }}
+      {{- range .Values.secretEnv.secrets }}
+      - name: {{ .secretName }}
+        secret:
+          secretName: {{ .secretName }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -61,6 +75,18 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+            {{- if .Values.secretEnv.enabled }}
+            {{- range .Values.secretEnv.secrets }}
+            {{- $secretName := .secretName }} 
+            {{- range .keys }}
+            - name: {{ .keyName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .keyName }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs/{{ .Values.appName }}
@@ -68,6 +94,13 @@ spec:
             - name: {{ .name }}
               mountPath: {{ .mountPath | quote }}
             {{- end }}
+            {{- if .Values.appcm.enabled }}
+            {{- range .Values.appcm.datas }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              subPath: {{ .subPath }}
+            {{- end }}
+            {{- end }}d
           resources:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
