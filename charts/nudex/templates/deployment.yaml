@@ -31,6 +31,17 @@ spec:
             {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
         podAntiAffinity: 
             {{- toYaml .Values.affinity.podAntiAffinity | nindent 10 }}
+      {{- if .Values.initContainers.enabled }}
+      initContainers:
+        - name: {{ .Values.initContainers.name }}
+          image: {{ .Values.initContainers.image }}
+          command: {{ .Values.initContainers.command | toYaml | nindent 12 }}
+          volumeMounts:
+            {{- range .Values.volumeClaimTemplates.pvItems }}
+            - name: {{ .name }}
+              mountPath: {{ .initContainerMountPath | quote }}
+            {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Values.appName }}
           {{- if .Values.env }}
@@ -40,13 +51,20 @@ spec:
               value: {{ $value | quote }}
           {{- end }}
           {{- end }}
+        {{- if .Values.secretEnv.enabled }}
+        {{- range .Values.secretEnv.secrets }}
+        {{- $secretName := .secretName }} 
+        {{- range .keys }}
+        - name: {{ .keyName }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $secretName }}
+              key: {{ .keyName }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.envFromSecrets.enabled }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.envFromSecrets.secret_name }}
-          {{- end }}
           ports: 
             {{- range.Values.service.ports }}
             - name: {{ .name }}
@@ -109,6 +127,13 @@ spec:
         - name: {{ .Values.appcm.name }}
           configMap:
             name: {{.Values.appcm.name }}
+        {{- end }}
+        {{- if .Values.secretEnv.enabled }}
+        {{- range .Values.secretEnv.secrets }}
+        - name: {{ .secretName }}
+          secret:
+            secretName: {{ .secretName }}
+        {{- end }}
         {{- end }}
       {{- if .Values.volumeClaimTemplates.sharePvc }}
       {{- range .Values.volumeClaimTemplates.pvItems }}
