@@ -16,11 +16,12 @@ appcm:
   # namespace: default
   # data:
 
+# initContainers 配置
+initContainers:
+  enabled: false
+
 strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxSurge: 25%
-    maxUnavailable: 25%
+  type: Recreate
 
 affinity:
   nodeAffinity:
@@ -50,45 +51,21 @@ env:
 secretEnv:
   enabled: true
   secrets:
-  - secretName: demo-1-name
-    keys:
-    - keyName: demo-1-key
-    - keyName: demo-2-key
-  - secretName: demo-2-name
-    keys:
-    - keyName: demo-3-key
-    - keyName: demo-4-key
+  - secretName: deposit-secrets
 
-# initContainers 配置
-initContainers:
-  enabled: false
-  name: init-create-dir
-  image: busybox:1.34
-  command:
-    - "/bin/sh"
-    - "-c"
-    - |
-        if [ ! -d "/data/spot/$(POD_NAME)" ]; then
-          echo "Directory /data/spot/$(POD_NAME) does not exist. Creating it..."
-          mkdir -p /data/spot/$(POD_NAME)
-        fi
-  volume:
-    name: jspottrade-volume
-    mountPath: /data/spot
 
 # PVC 配置
 volumeClaimTemplates:
   sharePvc: true # pod 共享目录
   pvItems:
     - name: deposit-tracker
-      accessModes: ReadWriteMany
+      accessModes: ReadWriteOnce
       resources:
         requests:
           storage: 50Gi
-      storageClassName: spot-trade-sc
+      storageClassName: gp3
       volumeMode: Filesystem
       mountPath: /app/data
-      efsServer: "fs-0f763c1b3767139a1"
       namespace: default
 
 # Deployment image

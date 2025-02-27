@@ -75,18 +75,13 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
-            {{- if .Values.secretEnv.enabled }}
-            {{- range .Values.secretEnv.secrets }}
-            {{- $secretName := .secretName }} 
-            {{- range .keys }}
-            - name: {{ .keyName }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $secretName }}
-                  key: {{ .keyName }}
-            {{- end }}
-            {{- end }}
-            {{- end }}
+          {{- if .Values.secretEnv.enabled }}
+          envFrom:
+          {{- range .Values.secretEnv.secrets }}
+          - secretKeyRef:
+              name: {{ .secretName }}
+          {{- end }}
+          {{- end }}
           volumeMounts:
             - name: logs
               mountPath: /app/logs/{{ .Values.appName }}
