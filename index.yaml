@@ -3,6 +3,16 @@ entries:
   nudex:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-02-27T17:15:36.85571884Z"
+    description: A Helm chart for deploying nudex
+    digest: 9b571698c9e2081d2f3779d7394f7212208af9d3c0f19126754bf3161f9fb017
+    name: nudex
+    type: application
+    urls:
+    - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-0.2.6/nudex-0.2.6.tgz
+    version: 0.2.6
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2025-02-27T08:55:45.616183707Z"
     description: A Helm chart for deploying nudex
     digest: d37b06955a2b8c413795f85f671d937bbe22d846b03c4db729f688f49be32889
@@ -132,6 +142,16 @@ entries:
     - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-0.1.2/nudex-0.1.2.tgz
     version: 0.1.2
   nudex-statefulset:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-02-27T17:15:36.968348344Z"
+    description: A Helm chart for deploying nudex
+    digest: 221741589c4c00573b0d64ac7ec525ec5c2aa6279e364bd43f513a6c2b03e2f8
+    name: nudex-statefulset
+    type: application
+    urls:
+    - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-statefulset-0.1.6/nudex-statefulset-0.1.6.tgz
+    version: 0.1.6
   - apiVersion: v2
     appVersion: 1.0.0
     created: "2025-02-26T08:29:18.724037555Z"
@@ -313,4 +333,4 @@ entries:
     urls:
     - https://github.com/nuvosphere/nudex-charts/releases/download/nudex-voter-0.0.1/nudex-voter-0.0.1.tgz
     version: 0.0.1
-generated: "2025-02-27T08:55:45.616347537Z"
+generated: "2025-02-27T17:15:36.968611966Z"
