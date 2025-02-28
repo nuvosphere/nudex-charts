@@ -1,41 +1,25 @@
 # StatefulSet 配置
-appName: nudex-spot-trade-server
-namespace: exchange
+appName: nux-deposit-tracker
+namespace: default
 
 # 是否启用 annotations
 annotations:
   enabled: false
-  app: "nudex-spot"
 
 # 副本数量
-replicaCount: 3
+replicaCount: 1
 
 appcm:
-  enabled: true
-  namespace: default
-  datas:
-  - name: demo-1
-    mountPath: /app/config
-    subPath: demo-1.config
-  - name: demo-2
-    mountPath: /app/config-2
-    subPath: demo-2.config
+  enabled: fasle
 
 secretEnv:
   enabled: true
   secrets:
-  - secretName: demo-1-name
-    keys:
-    - keyName: demo-1-key
-    - keyName: demo-2-key
-  - secretName: demo-2-name
-    keys:
-    - keyName: demo-3-key
-    - keyName: demo-4-key
+  - secretName: deposit-secrets
 
 # 镜像配置
 image:
-  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-spot-trade
+  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/test-nudex-deposit-tracker
   tag: 20250128
   pullPolicy: Always
 
@@ -46,28 +30,15 @@ strategy:
 # 资源限制与请求
 appResources:
   limits:
+    cpu: "2"
+    memory: "4Gi"
+  requests:
     cpu: "1"
     memory: "2Gi"
-  requests:
-    cpu: "200m"
-    memory: "512Mi"
 
 # initContainers 配置
 initContainers:
   enabled: false
-  name: init-create-dir
-  image: busybox:1.34
-  command:
-    - "/bin/sh"
-    - "-c"
-    - |
-        if [ ! -d "/data/spot/$(POD_NAME)" ]; then
-          echo "Directory /data/spot/$(POD_NAME) does not exist. Creating it..."
-          mkdir -p /data/spot/$(POD_NAME)
-        fi
-  volume:
-    name: jspottrade-volume
-    mountPath: /data/spot
 
 # 其他环境变量配置
 env:
@@ -102,7 +73,7 @@ filebeat_env:
 service:
   type: ClusterIP
   ports:
-  - name: appname
+  - name: nux-tracker
     # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
     port: 80
     targetPort: 8080
@@ -127,7 +98,7 @@ affinity:
         - key: app
           operator: In
           values:
-          - tagname
+          - nudex-testnet
   podAntiAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
     - labelSelector:
@@ -135,7 +106,7 @@ affinity:
         - key: app
           operator: In
           values:
-          - tagname
+          - nux-deposit-tracker
       topologyKey: kubernetes.io/hostname
 
 # PVC 配置
@@ -143,29 +114,15 @@ volumeClaimTemplates:
   sharePvc: enable # pod 共享目录
   enabled: false # pod 独享目录
   pvItems:
-    - name: snapshot-volume
-      accessModes: ReadWriteMany
+    - name: deposit-tracker
+      accessModes: ReadWriteOnce
       resources:
         requests:
           storage: 50Gi
-      storageClassName: spot-trade-sc
+      storageClassName: gp3-storage-class
       volumeMode: Filesystem
-      mountPath: /data/snapshot
-      initContainerMountPath: /data/spot-init
-      efsServer: "fs-0f763c1b3767139a1"
-      namespace: exchange
-
-    - name: jspottrade-volume
-      accessModes: ReadWriteMany
-      resources:
-        requests:
-          storage: 50Gi
-      storageClassName: spot-trade-sc
-      volumeMode: Filesystem
-      mountPath: /data/spot
-      initContainerMountPath: /data/spot-init
-      efsServer: "fs-0f763c1b3767139a1"
-      namespace: exchange
+      mountPath: /app/data
+      namespace: default
 
 # Health Check, add or modify customized livenessProbe  & readinessProbe
 livenessProbe:

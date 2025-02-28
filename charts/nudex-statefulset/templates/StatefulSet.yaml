@@ -78,7 +78,7 @@ spec:
           {{- if .Values.secretEnv.enabled }}
           envFrom:
           {{- range .Values.secretEnv.secrets }}
-          - secretKeyRef:
+          - secretRef:
               name: {{ .secretName }}
           {{- end }}
           {{- end }}
@@ -95,7 +95,7 @@ spec:
               mountPath: {{ .mountPath }}
               subPath: {{ .subPath }}
             {{- end }}
-            {{- end }}d
+            {{- end }}
           resources:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
