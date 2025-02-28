@@ -54,7 +54,7 @@ spec:
         {{- if .Values.secretEnv.enabled }}
           envFrom:
         {{- range .Values.secretEnv.secrets }}
-          - secretKeyRef:
+          - secretRef:
               name: {{ .secretName }}
         {{- end }}
         {{- end }}
