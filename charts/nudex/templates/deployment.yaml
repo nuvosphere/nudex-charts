@@ -12,8 +12,7 @@ metadata:
   {{- end }}
   {{- end  }}
   name: {{ .Values.appName }}
-  labels:
-    app: {{ .Values.appName }}
+  labels: {{- toYaml .Values.strategy | nindent 4 }}
   namespace: {{.Values.namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -68,17 +67,17 @@ spec:
             {{- end }}
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/{{ .Values.appName }}
+              mountPath: {{ .Values.appLog.path }}
             {{- if .Values.volumeClaimTemplates.sharePvc }}
             {{- range .Values.volumeClaimTemplates.pvItems }}
             - name: {{ .name }}
-              mountPath: {{.mountPath }}
+              mountPath: {{ .mountPath }}
             {{- end }}
             {{- end }} 
             {{- if .Values.appcm.enabled }}
-            - name: {{.Values.appcm.name }}
-              mountPath: /app/config/{{.Values.appName }}.json
-              subPath: {{.Values.appName }}.json
+            - name: {{ .Values.appcm.name }}
+              mountPath: {{ .Values.appcm.mountPath }}
+              subPath: {{ .Values.appName }}.json
             {{- end }}
           resources:
             limits:
@@ -101,7 +100,7 @@ spec:
               value: "{{ .Values.filebeat_env.KIBANA_HOST }}"
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/{{ .Values.appName }}
+              mountPath: {{ .Values.appLog.path }}
             - name: config
               mountPath: /usr/share/filebeat/filebeat.yml
               subPath: filebeat.yml

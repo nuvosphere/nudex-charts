@@ -1,6 +1,11 @@
 # Deployment Name
 appName: nux-deposit-tracker
 namespace: default
+labels:
+  app: nux-deposit-tracker
+
+appLog:
+  path: /app/logs/nip-indexer
 
 # Deployment Replicas
 replicaCount: 1
@@ -14,7 +19,7 @@ appcm:
   enabled: false
   # name: nux-deposit-tracker-cm
   # namespace: default
-  # data:
+  # mountPath: /app/config
 
 # initContainers 配置
 initContainers:
