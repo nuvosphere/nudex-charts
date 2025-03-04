@@ -17,13 +17,11 @@ metadata:
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
-    matchLabels:
-      app: {{ .Values.appName }}
+    matchLabels: {{- toYaml .Values.labels | nindent 6 }}
   strategy: {{- toYaml .Values.strategy | nindent 4 }}
   template:
     metadata:
-      labels:
-        app: {{- toYaml .Values.labels | nindent 4 }}
+      labels: {{- toYaml .Values.labels | nindent 8 }}
     spec:
       affinity:
         nodeAffinity: 
