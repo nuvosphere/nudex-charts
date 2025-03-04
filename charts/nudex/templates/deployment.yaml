@@ -47,24 +47,12 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
-            {{- if .Values.secretEnv.secretKeyRef }}
-            {{- $secretName := .Values.secretEnv.secretName }}
-            {{- range.Values.secretEnv.secretKeyRef }}
-            - name: {{ .key }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $secretName }}
-                  key: {{ .key }}
-            {{- end }}
-           {{- end }}
           {{- end }}
         {{- if .Values.secretEnv.enabled }}
           envFrom:
-        {{- if .Values.secretEnv.secretRef }}
         {{- range .Values.secretEnv.secrets }}
           - secretRef:
               name: {{ .secretName }}
-        {{- end }}
         {{- end }}
         {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

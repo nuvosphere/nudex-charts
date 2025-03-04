@@ -1,12 +1,11 @@
 # Deployment Name
-appName: nux-deposit-tracker
+appName: nux-demo
 namespace: default
 labels:
-  app: nux-deposit-tracker
+  app: nux-demo
 
 appLog:
-  path: /app/logs/nip-indexer
-
+  path: /app/logs/nux-demo
 # Deployment Replicas
 replicaCount: 1
 
@@ -19,14 +18,13 @@ appcm:
   enabled: false
   # name: nux-deposit-tracker-cm
   # namespace: default
-  # mountPath: /app/config
-
-# initContainers 配置
-initContainers:
-  enabled: false
+  # data:
 
 strategy:
-  type: Recreate
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 25%
 
 affinity:
   nodeAffinity:
@@ -44,69 +42,70 @@ affinity:
         - key: app
           operator: In
           values:
-          - nux-deposit-tracker
+          - nux-demo
       topologyKey: kubernetes.io/hostname
+
+# Deployment image
+image:
+  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-nudex-demo
+  tag: latest
+  pullPolicy: Always
+
 
 # Deployment env
 env:
   ENV_VAR_NAME: value
   SPRING_PROFILES_ACTIVE: dev
+  JAVA_OTEL_ENV: "-Dotel.traces.exporter=otlp \
+    -Dotel.metrics.exporter=otlp \
+    -Dotel.exporter.otlp.endpoint=http://otel-collector-collector.opentelemetry-operator-system:4317 \
+    -Dotel.resource.attributes='service.name=nux-demo-server,service.version=1.0' \
+    -Dotel.traces.sampler=parentbased_always_on \
+    -Dotel.sampler.arg=0.3 \
+    -javaagent:/app/opentelemetry-javaagent.jar"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: prometheus,health,info,metrics
+  MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
+  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: "true"
+  DEFAULT_JAVA_OPTS: "\
+    -Dfile.encoding=UTF-8 \
+    -XX:+UseZGC \
+    -XX:ParallelGCThreads=2 \
+    -Drocketmq.client.logUseSlf4j=true \
+    -Dcom.alibaba.nacos.naming.cache.dir=/data/nacos/naming \
+    -DJM.SNAPSHOT.PATH=/data/nacos/config \
+    -DJM.LOG.PATH=/data/nacos/logs \
+    -Dapp.name=nux-demo-server"
+  JAVA_HEAP_OPTS: "-Xmx512m -Xms256m"
   ENV_FILE: .dev.env
 
-secretEnv:
+envFromSecrets:
   enabled: false
-  secretName: nux-demo
-  secretKeyRef:
-  - key: test
-  - key: test2
-
-# PVC 配置
-volumeClaimTemplates:
-  sharePvc: true # pod 共享目录
-  pvItems:
-    - name: deposit-tracker
-      accessModes: ReadWriteOnce
-      resources:
-        requests:
-          storage: 50Gi
-      storageClassName: gp3
-      volumeMode: Filesystem
-      mountPath: /app/data
-      namespace: default
-
-# Deployment image
-image:
-  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-nudex-deposit-tracker
-  tag: latest
-  pullPolicy: Always
+  secrets:
+    - name: nux-demo
 
 # Deployment Resources
 appResources:
   limits:
-    cpu: "4"
-    memory: "8Gi"
-  requests:
     cpu: "1"
     memory: "2Gi"
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
 
 # Deployment Health Check
 livenessProbe:
   failureThreshold: 3
   httpGet:
-    path: /health
+    path: /actuator/health
     port: 8080
-    scheme: HTTP
   initialDelaySeconds: 30
   timeoutSeconds: 10
-  successThreshold: 1
   periodSeconds: 30
 readinessProbe:
   failureThreshold: 3
-  successThreshold: 1
   httpGet:
-    path: /health
+    path: /actuator/health
     port: 8080
-    scheme: HTTP
   initialDelaySeconds: 30
   timeoutSeconds: 10
   periodSeconds: 30
@@ -114,23 +113,12 @@ readinessProbe:
 # Deployment Service
 service:
   ports:
-  - name: nux-tracker
+  - name: nux-demo
     type: ClusterIP
-    # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
     port: 80
     targetPort: 8080
     protocol: TCP
     isMonitorPort: false
-  # - name: healthcheck
-  #   type: ClusterIP
-  #   port: 8080
-  #   targetPort: 8080
-  #   protocol: TCP
-  #   isMonitorPort: false
-
-#default  image secret
-imagePullSecrets:
-  - name: new-ecr-secret
 
 # filebeat config default
 filebeat:
@@ -138,7 +126,7 @@ filebeat:
     repository: docker.elastic.co/beats/filebeat
     tag: 7.10.1
     pullPolicy: Always
-  configName: "tracker-fb-cm"
+  configName: "nudex-demo-fbcm"
   logstashHost: "output-logstash.default:5045"
 
 filebeatResources:
@@ -151,9 +139,13 @@ filebeatResources:
 
 # filebeat env
 filebeat_env:
+  SPRING_PROFILES_ACTIVE: test
   ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
   LOGSTASH_HOSTS: "logstash:5044"
   KIBANA_HOST: "kibana:5601"
+
+imagePullSecrets:
+  - name: new-ecr-secret
 
 serviceMonitor:
   enabled: false
@@ -164,3 +156,27 @@ serviceMonitor:
     port: http-metrics
     scheme: http
     interval: 10s
+
+# PVC 配置
+volumeClaimTemplates:
+  sharePvc: false # pod 共享目录
+  enabled: false # pod 独享目录
+  # pvItems:
+  #   - name: deposit-tracker
+  #     accessModes: ReadWriteOnce
+  #     resources:
+  #       requests:
+  #         storage: 50Gi
+  #     storageClassName: gp3
+  #     volumeMode: Filesystem
+  #     mountPath: /app/data
+  #     namespace: default
+
+# initContainers 配置
+initContainers:
+  enabled: false
+
+secretEnv:
+  enabled: true
+  secrets:
+  -  secretName: dev-nacos
