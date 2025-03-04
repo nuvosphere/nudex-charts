@@ -52,9 +52,18 @@ spec:
           {{- end }}
         {{- if .Values.secretEnv.enabled }}
           envFrom:
+        {{- if.Values.secretEnv.secretRef }}
         {{- range .Values.secretEnv.secrets }}
           - secretRef:
               name: {{ .secretName }}
+        {{- end }}
+        {{- end }}
+        {{- if.Values.secretEnv.secretKeyRef }}
+        {{- range.Values.secretEnv.secretKeyRef }}
+          - secretKeyRef:
+              name: {{ .secretName }}
+              key: {{ .key }}
+        {{- end }}
         {{- end }}
         {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

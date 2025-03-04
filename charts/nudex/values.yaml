@@ -55,9 +55,11 @@ env:
 
 secretEnv:
   enabled: true
-  secrets:
+  secretKeyRef:
   - secretName: deposit-secrets
-
+    key: test
+  - secretName: deposit-secrets
+    key: test
 
 # PVC 配置
 volumeClaimTemplates:
