@@ -54,11 +54,11 @@ env:
   ENV_FILE: .dev.env
 
 secretEnv:
-  enabled: true
+  enabled: false
   secretName: nux-demo
   secretKeyRef:
   - key: test
-  - key: test
+  - key: test2
 
 # PVC 配置
 volumeClaimTemplates:
