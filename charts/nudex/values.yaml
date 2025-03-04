@@ -55,11 +55,10 @@ env:
 
 secretEnv:
   enabled: true
+  secretName: nux-demo
   secretKeyRef:
-  - secretName: deposit-secrets
-    key: test
-  - secretName: deposit-secrets
-    key: test
+  - key: test
+  - key: test
 
 # PVC 配置
 volumeClaimTemplates:

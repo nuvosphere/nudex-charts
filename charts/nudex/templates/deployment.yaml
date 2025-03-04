@@ -52,16 +52,17 @@ spec:
           {{- end }}
         {{- if .Values.secretEnv.enabled }}
           envFrom:
-        {{- if.Values.secretEnv.secretRef }}
+        {{- if .Values.secretEnv.secretRef }}
         {{- range .Values.secretEnv.secrets }}
           - secretRef:
               name: {{ .secretName }}
         {{- end }}
         {{- end }}
-        {{- if.Values.secretEnv.secretKeyRef }}
+        {{- if .Values.secretEnv.secretKeyRef }}
+        {{- $secretName := .Values.secretEnv.secretName }}
         {{- range.Values.secretEnv.secretKeyRef }}
           - secretKeyRef:
-              name: {{ .secretName }}
+              name: {{ $secretName }}
               key: {{ .key }}
         {{- end }}
         {{- end }}
@@ -69,7 +70,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports: 
-            {{- range.Values.service.ports }}
+            {{- range .Values.service.ports }}
             - name: {{ .name }}
               containerPort: {{ .targetPort }}
               protocol: {{.protocol }}
