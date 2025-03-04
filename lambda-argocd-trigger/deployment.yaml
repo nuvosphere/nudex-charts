@@ -1,0 +1,69 @@
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lambda-argocd-trigger
+  namespace: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lambda-trigger
+  template:
+    metadata:
+      labels:
+        app: lambda-trigger
+    spec:
+      serviceAccountName: lambda-sa
+      containers:
+      - name: lambda
+        image: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/lambda-argocd-trigger:latest
+        envFrom:
+        - secretRef:
+            name: lambda-trigger-config
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m" 
+            memory: "256Mi"
+
+---
+
+# rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lambda-sa
+  namespace: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lambda-role
+  namespace: argocd
+rules:
+- apiGroups: ["argoproj.io"]
+  resources: ["applications"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+  resourceNames: ["argocd-config"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lambda-role-binding
+  namespace: argocd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: lambda-role
+subjects:
+- kind: ServiceAccount
+  name: lambda-sa
+  namespace: argocd
