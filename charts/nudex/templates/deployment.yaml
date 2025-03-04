@@ -46,7 +46,17 @@ spec:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
-          {{- end }}
+            {{- end }}
+            {{- if .Values.secretEnv.secretKeyRef }}
+            {{- $secretName := .Values.secretEnv.secretName }}
+            {{- range.Values.secretEnv.secretKeyRef }}
+            - name: {{ .key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .key }}
+            {{- end }}
+           {{- end }}
           {{- end }}
         {{- if .Values.secretEnv.enabled }}
           envFrom:
@@ -54,14 +64,6 @@ spec:
         {{- range .Values.secretEnv.secrets }}
           - secretRef:
               name: {{ .secretName }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.secretEnv.secretKeyRef }}
-        {{- $secretName := .Values.secretEnv.secretName }}
-        {{- range.Values.secretEnv.secretKeyRef }}
-          - secretKeyRef:
-              name: {{ $secretName }}
-              key: {{ .key }}
         {{- end }}
         {{- end }}
         {{- end }}
