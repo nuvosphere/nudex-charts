@@ -145,6 +145,8 @@ filebeat_env:
   KIBANA_HOST: "kibana:5601"
 
 imagePullSecrets:
+  enabled: true
+  secrets:
   - name: new-ecr-secret
 
 serviceMonitor:
