@@ -78,8 +78,8 @@ spec:
               subPath: {{ .Values.appName }}.json
             {{- end }}
             {{- if .Values.secretProviderClass.enabled }}
-            - name: {{.Values.secretProviderClass.name }}
-              mountPath: {{.Values.secretProviderClass.mountPath }}
+            - name: {{ .Values.secretProviderClass.name }}
+              mountPath: {{ .Values.secretProviderClass.mountPath }}
               readOnly: true
             {{- end }}
           resources:
@@ -123,7 +123,7 @@ spec:
         {{- if .Values.appcm.enabled }}
         - name: {{ .Values.appcm.name }}
           configMap:
-            name: {{.Values.appcm.name }}
+            name: {{ .Values.appcm.name }}
         {{- end }}
         {{- if .Values.secretEnv.enabled }}
         {{- range .Values.secretEnv.secrets }}
@@ -147,13 +147,13 @@ spec:
             secretProviderClass: {{ .Values.secretProviderClass.className }}
           name: {{ .Values.secretProviderClass.name }}
         {{- end }}
-      {{- if.Values.serviceAccount.enabled }}
+      {{- if .Values.serviceAccount.enabled }}
       serviceAccount: {{ .Values.serviceAccount.name}}
       serviceAccountName: {{ .Values.serviceAccount.name}}
       {{- end }}
-      {{- if.Values.imagePullSecrets.enabled }}
+      {{- if .Values.imagePullSecrets.enabled }}
       imagePullSecrets: 
-        {{- range.Values.imagePullSecrets.secrets }}
+        {{- range .Values.imagePullSecrets.secrets }}
         - name: {{.name }}
       {{- end }}
       {{- end }}

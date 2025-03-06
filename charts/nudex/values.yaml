@@ -145,7 +145,7 @@ filebeat_env:
   KIBANA_HOST: "kibana:5601"
 
 imagePullSecrets:
-  enabled: true
+  enabled: false
   secrets:
   - name: new-ecr-secret
 
@@ -184,11 +184,11 @@ secretEnv:
   -  secretName: dev-nacos
 
 secretProviderClass:
-  enabled: true
+  enabled: false
   className: testnet-secrets-goat
   name: secrets-store-inline
   mountPath: /mnt/secrets-store
 
 serviceAccount:
-  enabled: true
+  enabled: false
   name: testnet3-secret
