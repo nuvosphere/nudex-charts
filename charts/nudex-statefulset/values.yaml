@@ -124,6 +124,16 @@ volumeClaimTemplates:
       mountPath: /app/data
       namespace: default
 
+secretProviderClass:
+  enabled: true
+  className: testnet-secrets-goat
+  name: secrets-store-inline
+  mountPath: /mnt/secrets-store
+
+serviceAccount:
+  enabled: true
+  name: testnet3-secret
+
 # Health Check, add or modify customized livenessProbe  & readinessProbe
 livenessProbe:
   failureThreshold: 3
