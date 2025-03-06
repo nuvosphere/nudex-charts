@@ -182,3 +182,13 @@ secretEnv:
   enabled: true
   secrets:
   -  secretName: dev-nacos
+
+secretProviderClass:
+  enabled: true
+  className: testnet-secrets-goat
+  name: secrets-store-inline
+  mountPath: /mnt/secrets-store
+
+serviceAccount:
+  enabled: true
+  name: testnet3-secret

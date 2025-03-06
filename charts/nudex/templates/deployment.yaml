@@ -77,6 +77,11 @@ spec:
               mountPath: {{ .Values.appcm.mountPath }}
               subPath: {{ .Values.appName }}.json
             {{- end }}
+            {{- if .Values.secretProviderClass.enabled }}
+            - name: {{.Values.secretProviderClass.name }}
+              mountPath: {{.Values.secretProviderClass.mountPath }}
+              readOnly: true
+            {{- end }}
           resources:
             limits:
               cpu: {{ .Values.appResources.limits.cpu }}
@@ -127,12 +132,24 @@ spec:
             secretName: {{ .secretName }}
         {{- end }}
         {{- end }}
-      {{- if .Values.volumeClaimTemplates.sharePvc }}
-      {{- range .Values.volumeClaimTemplates.pvItems }}
+       {{- if .Values.volumeClaimTemplates.sharePvc }}
+       {{- range .Values.volumeClaimTemplates.pvItems }}
         - name: {{ .name }}
           persistentVolumeClaim:
             claimName: {{ .name }}
-      {{- end }}
+       {{- end }}
+       {{- end }}
+       {{- if .Values.secretProviderClass.enabled }}
+        - csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.secretProviderClass.className }}
+          name: {{ .Values.secretProviderClass.name }}
+        {{- end }}
+      {{- if.Values.serviceAccount.enabled }}
+      serviceAccount: {{ .Values.serviceAccount.name}}
+      serviceAccountName: {{ .Values.serviceAccount.name}}
       {{- end }}
       {{- if.Values.imagePullSecrets.enabled }}
       imagePullSecrets: 
