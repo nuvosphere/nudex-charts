@@ -31,6 +31,7 @@ spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: ClusterFirstWithHostNet
       affinity:
         nodeAffinity: 
             {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
