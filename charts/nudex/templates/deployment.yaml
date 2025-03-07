@@ -115,30 +115,30 @@ spec:
               cpu: {{ .Values.filebeatResources.requests.cpu }}
               memory: {{ .Values.filebeatResources.requests.memory }}
       volumes:
-        - emptyDir: {}
-          name: logs
-        - name: config
-          configMap:
-            name: {{ .Values.filebeat.configName }}
-        {{- if .Values.appcm.enabled }}
-        - name: {{ .Values.appcm.name }}
-          configMap:
-            name: {{ .Values.appcm.name }}
-        {{- end }}
-        {{- if .Values.secretEnv.enabled }}
-        {{- range .Values.secretEnv.secrets }}
-        - name: {{ .secretName }}
-          secret:
-            secretName: {{ .secretName }}
-        {{- end }}
-        {{- end }}
-       {{- if .Values.volumeClaimTemplates.sharePvc }}
-       {{- range .Values.volumeClaimTemplates.pvItems }}
-        - name: {{ .name }}
-          persistentVolumeClaim:
-            claimName: {{ .name }}
-       {{- end }}
-       {{- end }}
+      - emptyDir: {}
+        name: logs
+      - name: config
+        configMap:
+          name: {{ .Values.filebeat.configName }}
+      {{- if .Values.appcm.enabled }}
+      - name: {{ .Values.appcm.name }}
+        configMap:
+          name: {{ .Values.appcm.name }}
+      {{- end }}
+      {{- if .Values.secretEnv.enabled }}
+      {{- range .Values.secretEnv.secrets }}
+      - name: {{ .secretName }}
+        secret:
+          secretName: {{ .secretName }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.volumeClaimTemplates.sharePvc }}
+      {{- range .Values.volumeClaimTemplates.pvItems }}
+      - name: {{ .name }}
+        persistentVolumeClaim:
+          claimName: {{ .name }}
+      {{- end }}
+      {{- end }}
       {{- if .Values.secretProviderClass.enabled }}
       - csi:
         driver: secrets-store.csi.k8s.io
