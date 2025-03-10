@@ -35,9 +35,9 @@ spec:
         nodeAffinity: 
             {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
       volumes:
-        - name: config-volume
-          configMap:
-            name: {{ .Values.appName }}-configmap  
+      - name: config-volume
+        configMap:
+          name: {{ .Values.appName }}-configmap  
       {{- if .Values.mountsecret }}
       {{- if .Values.mountsecret.enable }}
       - name: secrets-store-inline

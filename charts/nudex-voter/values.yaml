@@ -1,5 +1,5 @@
-appName: nudex-voter
-namespace: default
+appName: nudex-voter-node3
+namespace: goat-network
 
 replicaCount: 1
 
@@ -8,8 +8,8 @@ annotations:
 
 
 image:
-  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-nudex-voter
-  tag: latest
+  repository: 108782057122.dkr.ecr.us-east-2.amazonaws.com/nudex/main-nudex-voter-server
+  tag: v20250307155753-1
   pullPolicy: Always
 
 service:
@@ -32,8 +32,8 @@ updateStrategy:
   rollingUpdate:
     partition: 0
 
-
 envFromSecrets:
+- SUBMITTER_PRIVATE_KEY
 
 affinity:
   nodeAffinity:
@@ -43,18 +43,18 @@ affinity:
         - key: voter
           operator: In
           values:
-          - nudex-voter-node1
+          - nudex-voter-node3
 hostNetwork: true
 
 
 mountsecret:
-  enable: false
-  secretProviderClass: nudex-voter-secrets
-  secretName: awscredentials
+  enable: true
+  secretProviderClass: nudex-voter-secrets3
+  secretName: awscredentials-voter3
 
 serviceAccount: 
-  enable: false
-  name: nudex-voter-secret
+  enabled: true
+  name: nudex-secret-mainnet
 
 appResources:
   limits:
@@ -80,4 +80,4 @@ readinessProbe:
   timeoutSeconds: 10
   periodSeconds: 10
 env:
-  ENV_VAR_NAME: "value"
+  ENV_VAR_NAME: "value3"

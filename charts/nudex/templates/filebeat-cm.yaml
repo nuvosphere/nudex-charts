@@ -9,7 +9,7 @@ data:
     - type: log
       processors:
       paths:
-        - "/app/logs/{{ .Values.appName }}/*.log"
+        - "{{ .Values.appLog.path }}/*.log"
       fields: 
         app_name: {{ .Values.appName }}
         namespaces: default
