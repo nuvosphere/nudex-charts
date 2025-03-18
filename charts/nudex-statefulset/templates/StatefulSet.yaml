@@ -97,10 +97,12 @@ spec:
           volumeMounts:
             - name: logs
               mountPath: /app/logs/{{ .Values.appName }}
+            {{- if or .Values.volumeClaimTemplates.sharePvc .Values.volumeClaimTemplates.enabled }}
             {{- range .Values.volumeClaimTemplates.pvItems }}
             - name: {{ .name }}
               mountPath: {{ .mountPath | quote }}
             {{- end }}
+            {{- end }} 
             {{- if .Values.appcm.enabled }}
             {{- range .Values.appcm.datas }}
             - name: {{ .name }}
