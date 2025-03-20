@@ -16,6 +16,9 @@ spec:
       targetPort: {{ .targetPort }}
       protocol: {{ .protocol }}
       {{- end }}     
+      {{- if .Values.service.Headless }}
+      clusterIP: None
+      {{- end }}
       {{- if eq .Values.service.type "NodePort" }}
       {{- if .Values.service.nodePort }}
       nodePort: {{ .Values.service.nodePort }}

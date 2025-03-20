@@ -49,15 +49,15 @@ affinity:
         topologyKey: kubernetes.io/hostname
 # Deployment env
 env:
-  ENV_VAR_NAME: value
-  ENV_FILE: .dev.env
-  SPRING_PROFILES_ACTIVE: dev
+  ENV_VAR_NAME: ""
+  ENV_FILE: ""
+  SPRING_PROFILES_ACTIVE: ""
   JAVA_OTEL_ENV: ""
-  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: prometheus,health,info,metrics
-  MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
-  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: "true"
-  DEFAULT_JAVA_OPTS: " -Dfile.encoding=UTF-8 -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=16 -Drocketmq.client.logUseSlf4j=true -Dcom.alibaba.nacos.naming.cache.dir=/data/nacos/naming -DJM.SNAPSHOT.PATH=/data/nacos/config -DJM.LOG.PATH=/data/nacos/logs -Dapp.name=nux-clear-engine"
-  JAVA_HEAP_OPTS: "-Xmx4G -Xms2G"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: ""
+  MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: ""
+  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: ""
+  DEFAULT_JAVA_OPTS: ""
+  JAVA_HEAP_OPTS: ""
 envFromSecrets:
   enabled: false
   # secrets:
@@ -107,6 +107,7 @@ service:
       targetPort: 9080
       protocol: TCP
       isMonitorPort: false
+      Headless: true
 #default  image secret
 imagePullSecrets:
   - name: new-ecr-secret
