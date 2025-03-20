@@ -7,6 +7,9 @@ metadata:
   namespace: {{.Values.namespace }}
 spec:
   type: {{ .Values.service.type }}
+  {{- if .Values.service.Headless }}
+  clusterIP: None
+  {{- end }}
   selector:
     app: {{ .Values.appName }}
   ports:
@@ -15,9 +18,6 @@ spec:
       port: {{ .port }}
       targetPort: {{ .targetPort }}
       protocol: {{ .protocol }}
-      {{- if .Headless }}
-      clusterIP: None
-      {{- end }}
     {{- end }}     
       {{- if eq .Values.service.type "NodePort" }}
       {{- if .Values.service.nodePort }}

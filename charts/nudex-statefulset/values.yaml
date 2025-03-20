@@ -1,124 +1,87 @@
-# Deployment Name
-appName: nux-clear-engine
+# StatefulSet 配置
+appName: nux-trading-engine-0
 namespace: exchange
-labels:
-  app: nux-clear-engine
-appLog:
-  path: /app/logs/nux-clear-engine
+
+# 是否启用 annotations
 annotations:
   enabled: false
+
 secretProviderClass:
   enabled: false
+
 serviceAccount:
   enabled: false
+  
 appcm:
-  enabled: false
-volumeClaimTemplates:
-  sharePvc: false # pod 共享目录
-  enabled: false # pod 独享目录
-initContainers:
-  enabled: false
+  enabled: fasle
+  
 secretEnv:
   enabled: true
   secrets:
-    - secretName: dev-nacos
-# Deployment Replicas
-replicaCount: 1
-strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxSurge: 25%
-    maxUnavailable: 25%
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: app
-              operator: In
-              values:
-                - nudex-devnet
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-            - key: app
-              operator: In
-              values:
-                - nux-clear-engine
-        topologyKey: kubernetes.io/hostname
-# Deployment env
-env:
-  ENV_VAR_NAME: ""
-  ENV_FILE: ""
-  SPRING_PROFILES_ACTIVE: ""
-  JAVA_OTEL_ENV: ""
-  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: ""
-  MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: ""
-  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: ""
-  DEFAULT_JAVA_OPTS: ""
-  JAVA_HEAP_OPTS: ""
-envFromSecrets:
-  enabled: false
-  # secrets:
-  #   - name: secret-name
-  #     key: secret-key
-# Deployment image
+  - secretName: dev-nacos
+
+# 副本数量
+replicaCount: 3
+
+# 镜像配置
 image:
-  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-nudex-clearing-engine
-  tag: v20250318194516-265
+  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-trading-engine
+  tag: latest
   pullPolicy: Always
-# Deployment Resources
+
+# StatefulSet 更新策略
+strategy:
+  type: RollingUpdate  # 可选择 RollingUpdate 或 OnDelete
+
+# 资源限制与请求
 appResources:
   limits:
-    cpu: "500m"
+    cpu: 1
     memory: "5Gi"
   requests:
-    cpu: "500m"
+    cpu: 1
     memory: "1Gi"
-# Deployment Health Check
-livenessProbe:
-  failureThreshold: 3
-  httpGet:
-    path: /health
-    port: 8080
-    scheme: HTTP
-  initialDelaySeconds: 30
-  timeoutSeconds: 10
-  successThreshold: 1
-  periodSeconds: 30
-readinessProbe:
-  failureThreshold: 3
-  successThreshold: 1
-  httpGet:
-    path: /health
-    port: 8080
-    scheme: HTTP
-  initialDelaySeconds: 30
-  timeoutSeconds: 10
-  periodSeconds: 30
-# Deployment Service
-service:
-  ports:
-    - name: clear-engine
-      type: ClusterIP
-      # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
-      port: 9080
-      targetPort: 9080
-      protocol: TCP
-      isMonitorPort: false
-      Headless: true
-#default  image secret
-imagePullSecrets:
-  - name: new-ecr-secret
-# filebeat config default
+
+# initContainers 配置
+initContainers:
+  enabled: false
+
+# 其他环境变量配置
+env:
+  ENV_VAR_NAME: value
+  SPRING_PROFILES_ACTIVE: dev
+  JAVA_OTEL_ENV: ""
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: prometheus,health,info,metrics
+  MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
+  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: "true"
+  RAFT_CLUSTER_GROUP: nux-trading-engine-0
+  DEFAULT_JAVA_OPTS: " \
+    -Dfile.encoding=UTF8 \
+    -XX:+UseZGC \
+    --add-opens java.base/java.math=ALL-UNNAMED \
+    --add-opens java.base/java.lang=ALL-UNNAMED \
+    --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+    -XX:MaxDirectMemorySize=1g \
+    -XX:MaxMetaspaceSize=512m \
+    -Drocketmq.client.logUseSlf4j=true \
+    -Dcom.alibaba.nacos.naming.cache.dir=/data/nacos/naming \
+    -DJM.SNAPSHOT.PATH=/data/nacos/config \
+    -DJM.LOG.PATH=/data/nacos/logs \
+    -DAPP_NAME=$(POD_NAME) \
+    -Dcustom.property=/data/spot/$(POD_NAME) \
+    -Dspring.profiles.active=dev"
+  JAVA_HEAP_OPTS: "-Xmx4G -Xms2G"
+
+# 文件beat 配置
 filebeat:
+  enabled: true
   image:
     repository: docker.elastic.co/beats/filebeat
     tag: 7.10.1
     pullPolicy: Always
-  configName: " clear-fb-cm"
+  configName: trading-fb
   logstashHost: "output-logstash.default:5045"
+
 filebeatResources:
   limits:
     cpu: "500m"
@@ -126,12 +89,33 @@ filebeatResources:
   requests:
     cpu: "100m"
     memory: "100Mi"
+
 # filebeat env
 filebeat_env:
   SPRING_PROFILES_ACTIVE: test
   ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
   LOGSTASH_HOSTS: "logstash:5044"
   KIBANA_HOST: "kibana:5601"
+  
+
+# Deployment Service
+service:
+  type: ClusterIP
+  Headless: true
+  ports:
+  - name: trading
+    port: 9080
+    targetPort: 9080
+    protocol: TCP
+    isMonitorPort: false
+  
+  - name: trading-raft
+    port: 9180
+    targetPort: 9180
+    protocol: TCP
+    isMonitorPort: false
+    
+
 serviceMonitor:
   enabled: false
   namespace: monitor
@@ -141,3 +125,55 @@ serviceMonitor:
     port: http-metrics
     scheme: http
     interval: 10s
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - nudex-devnet
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - nudex-trading-engine
+      topologyKey: kubernetes.io/hostname
+
+# PVC 配置
+volumeClaimTemplates:
+  sharePvc: enable # pod 共享目录
+  enabled: false # pod 独享目录
+  pvItems:
+    - name: trading-engine
+      accessModes: ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: gp3
+      volumeMode: Filesystem
+      mountPath: /data/
+      namespace: exchange
+
+# Health Check, add or modify customized livenessProbe  & readinessProbe
+livenessProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /actuator/health
+    port: 8080
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
+readinessProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /actuator/health
+    port: 8080
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
