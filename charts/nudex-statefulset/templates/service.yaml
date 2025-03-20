@@ -15,10 +15,10 @@ spec:
       port: {{ .port }}
       targetPort: {{ .targetPort }}
       protocol: {{ .protocol }}
-      {{- end }}     
-      {{- if eq .Values.service.Headless "true"}}
+      {{- if .Headless }}
       clusterIP: None
       {{- end }}
+    {{- end }}     
       {{- if eq .Values.service.type "NodePort" }}
       {{- if .Values.service.nodePort }}
       nodePort: {{ .Values.service.nodePort }}
