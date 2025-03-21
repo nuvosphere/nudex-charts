@@ -2,6 +2,9 @@
 appName: nux-trading-engine-0
 namespace: exchange
 
+appLog:
+  path: /app/logs/nux-deposit-tracker
+  
 # 是否启用 annotations
 annotations:
   enabled: false

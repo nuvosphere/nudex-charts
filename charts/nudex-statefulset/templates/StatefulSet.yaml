@@ -138,7 +138,7 @@ spec:
               value: "{{ .Values.filebeat_env.KIBANA_HOST }}"
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/{{ .Values.appName }}
+              mountPath: {{ .Values.appLog.path }}
             - name: config
               mountPath: /usr/share/filebeat/filebeat.yml
               subPath: filebeat.yml
