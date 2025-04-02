@@ -43,6 +43,10 @@ spec:
         - name: {{ .Values.appName }}
           {{- if .Values.env }}
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
