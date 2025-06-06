@@ -36,6 +36,9 @@ spec:
         nodeAffinity: 
             {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
       volumes:
+      - name: tss-config
+        configMap:
+          name: {{ .Values.tssname }}-configmap
       - name: config-volume
         configMap:
           name: {{ .Values.appName }}-configmap  
@@ -93,6 +96,42 @@ spec:
               memory: {{ .Values.appResources.requests.memory }}
           livenessProbe: {{- toYaml .Values.livenessProbe | nindent 12}}
           readinessProbe: {{- toYaml .Values.readinessProbe | nindent 12}}
+
+
+        - name: {{ .Values.tssname }}
+          image: "{{ .Values.tssimage.repository }}:{{ .Values.tssimage.tag }}"
+          imagePullPolicy: {{ .Values.tssimage.pullPolicy }}
+          env:
+            {{- $secretName := .Values.mountsecret.secretName -}}
+            {{- range .Values.tssenvFromSecrets }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ . }}
+            {{- end }}
+          ports:
+            {{- range .Values.service.tssports }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
+              protocol: TCP
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: tss-config
+              mountPath: /app/config/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          resources:
+            {{- toYaml .Values.resources.tss | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe.tss | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe.tss | nindent 12 }}
   volumeClaimTemplates:
     - metadata:
         name: data
