@@ -73,7 +73,13 @@ spec:
           args:
             - "-c"
             - |
-              {{ .Values.startupCommand }}
+              echo "Waiting for tss-node on port 8180"
+              until nc -z localhost 8180; do
+                echo "Still waiting for tss-node on port 8180"
+                sleep 10
+              done
+              echo "tss-node is ready. Starting nudex-voter"
+              exec /app/nudex-voter -c /app/config.yaml
           ports:
             {{- range .Values.service.ports }}
             - name: {{ .name }}
