@@ -35,6 +35,30 @@ spec:
       affinity:
         nodeAffinity: 
             {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
+      {{- if .Values.initContainer.enabled }}
+      initContainers:
+      - name: {{ .Values.initContainer.name }}
+        image: "{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
+        imagePullPolicy: {{ .Values.initContainer.image.pullPolicy }}
+        command: {{- toYaml .Values.initContainer.command | nindent 10 }}
+        args:
+          - |
+            {{- if .Values.initContainer.waitForService.enabled }}
+            {{- if eq .Values.initContainer.waitForService.type "tcp" }}
+            until nc -z {{ .Values.initContainer.waitForService.host }} {{ .Values.initContainer.waitForService.port }}; do 
+              echo "等待 {{ .Values.initContainer.waitForService.name }} 服务就绪..."; 
+              sleep {{ .Values.initContainer.waitForService.interval }}; 
+            done; 
+            echo "{{ .Values.initContainer.waitForService.name }} 服务已就绪!";
+            {{- end }}
+            {{- end }}
+            {{- if .Values.initContainer.extraCommands }}
+            {{- range .Values.initContainer.extraCommands }}
+            {{ . }}
+            {{- end }}
+            {{- end }}
+        resources: {{- toYaml .Values.initContainer.resources | nindent 10 }}
+      {{- end }}
       volumes:
       - name: tss-config
         configMap:
