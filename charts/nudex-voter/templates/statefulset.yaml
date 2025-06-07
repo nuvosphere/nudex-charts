@@ -151,11 +151,11 @@ spec:
               mountPath: "/mnt/secrets-store"
               readOnly: true
           resources:
-            {{- toYaml .Values.resources.tss | nindent 12 }}
+            {{- toYaml .Values.tssresources | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.readinessProbe.tss | nindent 12 }}
+            {{- toYaml .Values.tssreadinessProbe | nindent 12 }}
           livenessProbe:
-            {{- toYaml .Values.livenessProbe.tss | nindent 12 }}
+            {{- toYaml .Values.tsslivenessProbe | nindent 12 }}
   volumeClaimTemplates:
     - metadata:
         name: data
