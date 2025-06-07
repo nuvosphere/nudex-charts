@@ -128,7 +128,7 @@ spec:
               protocol: TCP
             {{- end }}
           volumeMounts:
-            - name: data
+            - name: data-tss
               mountPath: /app/data
             - name: tss-config
               mountPath: /app/config/config.yaml
@@ -154,3 +154,13 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size }}
+    - metadata:
+        name: data-tss
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.tsssize }}
