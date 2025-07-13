@@ -20,4 +20,13 @@ spec:
       {{- if .Values.service.nodePort }}
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}
+    {{- end }}
+    {{- range .Values.service.tssports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: TCP
+      {{- if and (eq $.Values.service.type "NodePort") (hasKey . "nodePort") }}
+      nodePort: {{ .nodePort }}
       {{- end }}
+    {{- end }}

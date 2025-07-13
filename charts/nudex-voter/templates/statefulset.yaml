@@ -36,6 +36,9 @@ spec:
         nodeAffinity: 
             {{- toYaml .Values.affinity.nodeAffinity | nindent 10 }}
       volumes:
+      - name: tss-config
+        configMap:
+          name: {{ .Values.tssname }}-configmap
       - name: config-volume
         configMap:
           name: {{ .Values.appName }}-configmap  
@@ -66,6 +69,17 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+          command: ["/bin/sh"]
+          args:
+            - "-c"
+            - |
+              echo "Waiting for tss-node on port 8180"
+              until nc -z localhost 8180; do
+                echo "Still waiting for tss-node on port 8180"
+                sleep 10
+              done
+              echo "tss-node is ready. Starting nudex-voter"
+              exec /app/nudex-voter -c /app/config.yaml
           ports:
             {{- range .Values.service.ports }}
             - name: {{ .name }}
@@ -93,6 +107,42 @@ spec:
               memory: {{ .Values.appResources.requests.memory }}
           livenessProbe: {{- toYaml .Values.livenessProbe | nindent 12}}
           readinessProbe: {{- toYaml .Values.readinessProbe | nindent 12}}
+
+
+        - name: {{ .Values.tssname }}
+          image: "{{ .Values.tssimage.repository }}:{{ .Values.tssimage.tag }}"
+          imagePullPolicy: {{ .Values.tssimage.pullPolicy }}
+          env:
+            {{- $secretName := .Values.mountsecret.secretName -}}
+            {{- range .Values.tssenvFromSecrets }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ . }}
+            {{- end }}
+          ports:
+            {{- range .Values.service.tssports }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
+              protocol: TCP
+            {{- end }}
+          volumeMounts:
+            - name: data-tss
+              mountPath: /app/data
+            - name: tss-config
+              mountPath: /app/config/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          resources:
+            {{- toYaml .Values.tssresources | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.tssreadinessProbe | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.tsslivenessProbe | nindent 12 }}
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -104,3 +154,13 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size }}
+    - metadata:
+        name: data-tss
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.tsssize }}
