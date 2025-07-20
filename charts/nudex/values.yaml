@@ -58,6 +58,7 @@ appResources:
 # initContainers 配置
 initContainers:
   enabled: false
+  init_pv_enabled: false
 
 # 其他环境变量配置
 env:

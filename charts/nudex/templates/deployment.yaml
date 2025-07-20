@@ -33,11 +33,13 @@ spec:
         - name: {{ .Values.initContainers.name }}
           image: {{ .Values.initContainers.image }}
           command: {{ .Values.initContainers.command | toYaml | nindent 12 }}
+          {{- if .Values.initContainers.init_pv_enabled }}-}}
           volumeMounts:
             {{- range .Values.volumeClaimTemplates.pvItems }}
             - name: {{ .name }}
               mountPath: {{ .initContainerMountPath | quote }}
             {{- end }}
+          {{- end }}
       {{- end }}
       containers:
         - name: {{ .Values.appName }}
