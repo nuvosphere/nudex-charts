@@ -12,12 +12,13 @@ spec:
     {{- range .Values.service.ports }}
     {{- if .isMonitorPort  }}
     - port: {{ .name }}
+      path: {{ .path }}
+      scheme: {{ .scheme }}
+      interval: {{ .interval }}
     {{- end }}
     {{- end }}
-    {{- toYaml .Values.serviceMonitor.config | nindent 6}}
   selector: 
     matchLabels:
       app: {{ .Values.appName }}
       release: {{ .Values.serviceMonitor.release }}
 {{- end}}
-
