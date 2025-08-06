@@ -17,6 +17,9 @@ spec:
       interval: {{ .interval }}
     {{- end }}
     {{- end }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Values.namespace }}
   selector: 
     matchLabels:
       app: {{ .Values.appName }}
