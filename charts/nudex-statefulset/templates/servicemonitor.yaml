@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Values.serviceMonitor.namespace }}
   labels:
     app: {{ .Values.appName }}
-        release: {{ .Values.serviceMonitor.release }}
+    release: {{ .Values.serviceMonitor.release }}
 spec:
   endpoints: 
     {{- range .Values.service.ports }}

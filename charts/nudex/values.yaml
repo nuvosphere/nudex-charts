@@ -1,78 +1,166 @@
-# StatefulSet 配置
-appName: nux-deposit-tracker
-namespace: default
-
+# Deployment Name
+appName: nux-gateway-ws
+namespace: exchange
 labels:
-  app: nux-deposit-tracker
+  app: nux-gateway-ws
 
 appLog:
-  path: /app/logs/nux-deposit-tracker
+  path: /app/logs/
 
-# 是否启用 annotations
 annotations:
   enabled: false
 
 secretProviderClass:
-  enabled: true
-  className: mainnet-tracker
-  name: secrets-store-inline
-  mountPath: /mnt/secrets-store
+  enabled: false
 
 serviceAccount:
-  enabled: true
-  name: nudex-secret-mainnet
-
-# 副本数量
-replicaCount: 1
+  enabled: false
 
 appcm:
-  enabled: fasle
+  enabled: false
+
+volumeClaimTemplates:
+  sharePvc: false # pod 共享目录
+  enabled: false # pod 独享目录
+
+initContainers:
+  enabled: false
 
 secretEnv:
   enabled: true
   secrets:
-  - secretName: main-nacos
+  -  secretName: dev-nacos
+# Deployment Replicas
+replicaCount: 2
 
-imagePullSecrets:
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 25%
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - nudex-devnet
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - nux-gateway-ws
+      topologyKey: kubernetes.io/hostname
+
+# Deployment env
+env:
+  ENV_VAR_NAME: value
+  SPRING_PROFILES_ACTIVE: dev
+  JAVA_OTEL_ENV: ""
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: prometheus,health,info,metrics
+  MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED: "true"
+  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: "true"
+  DEFAULT_JAVA_OPTS: " \
+    -Dfile.encoding=UTF-8 \
+    -XX:+UseZGC \
+    -Drocketmq.client.logUseSlf4j=true \
+    -Dcom.alibaba.nacos.naming.cache.dir=/tmp/nacos/naming \
+    -DJM.SNAPSHOT.PATH=/tmp/nacos/config \
+    -Dspring.profiles.active=dev \
+    -Dmanagement.server.port=10000 \
+    -DAPP_NAME=$(POD_NAME)"
+  JAVA_HEAP_OPTS: "-Xmx4G -Xms2G"
+
+envFromSecrets:
   enabled: false
+  # secrets:
+  #   - name: secret-name
+  #     key: secret-key
 
-# 镜像配置
+# Deployment image
 image:
-  repository: 108782057122.dkr.ecr.us-east-2.amazonaws.com/nudex/main-nudex-deposit-tracker
+  repository: 590184059249.dkr.ecr.us-west-2.amazonaws.com/nudex/dev-gateway-ws
   tag: latest
   pullPolicy: Always
 
-# StatefulSet 更新策略
-strategy:
-  type: RollingUpdate  # 可选择 RollingUpdate 或 OnDelete
-
-# 资源限制与请求
+# Deployment Resources
 appResources:
   limits:
-    cpu: "2"
-    memory: "4Gi"
+    cpu: "500m"
+    memory: "5Gi"
   requests:
-    cpu: "1"
-    memory: "2Gi"
+    cpu: "100m"
+    memory: "500Mi"
 
-# initContainers 配置
-initContainers:
+# Deployment Health Check
+livenessProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /actuator/health
+    port: 10000
+    scheme: HTTP
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  successThreshold: 1
+  periodSeconds: 30
+readinessProbe:
+  failureThreshold: 3
+  successThreshold: 1
+  httpGet:
+    path: /actuator/health
+    port: 10000
+    scheme: HTTP
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
+
+# Deployment Service
+service:
+  ports:
+  - name: gateway-ws
+    type: ClusterIP
+    # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
+    port: 9081
+    targetPort: 9081
+    protocol: TCP
+    isMonitorPort: false
+  - name: public
+    type: ClusterIP
+    port: 8090
+    targetPort: 8090
+    protocol: TCP
+    isMonitorPort: false
+  - name: private
+    type: ClusterIP
+    port: 8091
+    targetPort: 8091
+    protocol: TCP
+    isMonitorPort: false
+  - name: management
+    port: 10000
+    targetPort: 10000
+    protocol: TCP
+    isMonitorPort: true
+    path: /actuator/prometheus
+    scheme: http
+    interval: 10s
+#default  image secret
+imagePullSecrets:
   enabled: false
-  init_pv_enabled: false
 
-# 其他环境变量配置
-env:
-  ENV_VAR_NAME: value
-  SPRING_PROFILES_ACTIVE: prod
-
-# 文件beat 配置
+# filebeat config default
 filebeat:
-  enabled: true
   image:
     repository: docker.elastic.co/beats/filebeat
     tag: 7.10.1
     pullPolicy: Always
-  configName: filebeat-config
+  configName: " gateway-ws"
   logstashHost: "output-logstash.default:5045"
 
 filebeatResources:
@@ -90,75 +178,8 @@ filebeat_env:
   LOGSTASH_HOSTS: "logstash:5044"
   KIBANA_HOST: "kibana:5601"
 
-# Deployment Service
-service:
-  type: ClusterIP
-  ports:
-  - name: nux-tracker
-    # nodePort: 35678 # 如果type为NodePort，可以指定nodePort
-    port: 80
-    targetPort: 8080
-    protocol: TCP
-    isMonitorPort: false
-
 serviceMonitor:
   enabled: false
   namespace: monitor
-  release: "nudex-testnet"
-  config:
-    path: /metricsxw
-    port: http-metrics
-    scheme: http
-    interval: 10s
-
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: tss
-          operator: In
-          values:
-          - nitro
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - nux-deposit-tracker
-      topologyKey: kubernetes.io/hostname
-
-# PVC 配置
-volumeClaimTemplates:
-  sharePvc: enable # pod 共享目录
-  enabled: false # pod 独享目录
-  pvItems:
-    - name: deposit-tracker
-      accessModes: ReadWriteOnce
-      resources:
-        requests:
-          storage: 50Gi
-      storageClassName: gp3
-      volumeMode: Filesystem
-      mountPath: /app/data
-      namespace: default
-
-# Health Check, add or modify customized livenessProbe  & readinessProbe
-livenessProbe:
-  failureThreshold: 3
-  httpGet:
-    path: /health
-    port: 8080
-  initialDelaySeconds: 30
-  timeoutSeconds: 10
-  periodSeconds: 30
-readinessProbe:
-  failureThreshold: 3
-  httpGet:
-    path: /health
-    port: 8080
-  initialDelaySeconds: 30
-  timeoutSeconds: 10
-  periodSeconds: 30
+  release: "devnet"
+  jobLabel: "nudex-devnet"
