@@ -17,7 +17,7 @@ spec:
       interval: {{ .interval }}
     {{- end }}
     {{- end }}
-  jobLabel: {{ .Values.serviceMonitor.release }}
+  jobLabel: {{ .Values.serviceMonitor.jobLabel }}
   namespaceSelector:
     matchNames:
     - {{ .Values.namespace }}
