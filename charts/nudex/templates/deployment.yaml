@@ -99,8 +99,10 @@ spec:
             requests:
               cpu: {{ .Values.appResources.requests.cpu }}
               memory: {{ .Values.appResources.requests.memory }}
+          {{- if .Values.healthCheck.enabled }}
           livenessProbe: {{- toYaml .Values.livenessProbe | nindent 12}}
           readinessProbe: {{- toYaml .Values.readinessProbe | nindent 12}}
+          {{- end }}
         - name: filebeat
           image: "{{ .Values.filebeat.image.repository }}:{{ .Values.filebeat.image.tag }}"
           imagePullPolicy: {{ .Values.filebeat.image.pullPolicy }}
